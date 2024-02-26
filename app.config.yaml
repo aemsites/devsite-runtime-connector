@@ -1,0 +1,27 @@
+application:
+  actions: actions
+  web: web-src
+  runtimeManifest:
+    packages:
+      GatsbyToMark:
+        license: Apache-2.0
+        actions:
+          generic:
+            function: actions/generic/index.js
+            web: 'yes'
+            runtime: nodejs:18
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          publish-events:
+            function: actions/publish-events/index.js
+            web: 'yes'
+            runtime: nodejs:18
+            inputs:
+              LOG_LEVEL: debug
+              apiKey: $SERVICE_API_KEY
+            annotations:
+              require-adobe-auth: true
+              final: true
