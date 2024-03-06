@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "node",
+    "removeComments": true,
+    "esModuleInterop": true,
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "@types/node"
+    ],
+    "outDir": "dist"
+  },
+  "include": [
+    "src"
+  ]
+}
