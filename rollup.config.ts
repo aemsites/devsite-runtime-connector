@@ -10,18 +10,15 @@
  * governing permissions and limitations under the License.
  */
 
-import { OWParams, OWResponse } from "./types";
+import typescript from '@rollup/plugin-typescript';
 
-function main(params: OWParams): OWResponse {
-  // const req = new Request(process.env.)
-  console.log('hello log: ', params);
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'text/plain' },
-    body: 'hello'
-  }
+export default {
+  input: 'src/index.ts',
+  sourcemap: false,
+  output: {
+    file: 'dist/index.js',
+    format: 'esm',
+    strict: false
+  },
+  plugins: [typescript()]
 };
-
-export {
-  main
-}

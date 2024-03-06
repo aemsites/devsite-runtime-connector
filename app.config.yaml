@@ -1,17 +1,17 @@
 application:
-  actions: actions
-  web: web-src
+  hooks:
+    pre-app-build: npm run build
   runtimeManifest:
     packages:
-      GatsbyToMark:
+      md2markup:
         license: Apache-2.0
         actions:
-          generic:
+          main:
             function: dist/index.js
             web: 'yes'
             runtime: nodejs:20
             inputs:
               LOG_LEVEL: debug
             annotations:
-              require-adobe-auth: true
+              require-adobe-auth: false
               final: true
