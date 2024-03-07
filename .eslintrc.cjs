@@ -20,11 +20,61 @@ module.exports = {
     requireConfigFile: false,
   },
   rules: {
-    // allow reassigning param
     'no-param-reassign': [2, { props: false }],
     'linebreak-style': ['error', 'unix'],
     'import/extensions': ['error', {
       js: 'always',
     }],
   },
+  overrides: [
+    {
+      files: ['*.ts'],
+      extends: [
+        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/recommended-requiring-type-checking',
+      ],
+      parser: '@typescript-eslint/parser',
+      plugins: [
+        '@typescript-eslint',
+      ],
+      rules: {
+        'arrow-body-style': 'off',
+        'prefer-arrow-callback': 'off',
+        'no-use-before-define': 'off',
+        '@typescript-eslint/no-use-before-define': 'error',
+        'no-shadow': 'off',
+        '@typescript-eslint/no-shadow': 'error',
+        '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+        '@typescript-eslint/no-misused-promises': [
+          'error',
+          {
+            checksVoidReturn: false,
+          },
+        ],
+        '@typescript-eslint/require-await': 'warn',
+      },
+      settings: {
+        'import/resolver': {
+          typescript: {
+            alwaysTryTypes: true,
+            project: './tsconfig.json',
+          },
+        },
+      },
+      parserOptions: {
+        project: './tsconfig.json',
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          impliedStrict: true,
+        },
+      },
+    },
+    {
+      files: ['*.d.ts'],
+      rules: {
+        'header/header': 'off',
+      },
+    },
+  ],
 };

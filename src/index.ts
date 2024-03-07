@@ -10,18 +10,16 @@
  * governing permissions and limitations under the License.
  */
 
-import { OWParams, OWResponse } from "./types";
+import type { Helix } from '@adobe/helix-universal';
+import wrap from '@adobe/helix-shared-wrap';
+import { Request, Response } from '@adobe/fetch';
+// eslint-disable-next-line
+import { createAdapter } from '../node_modules/@adobe/helix-universal/src/openwhisk-adapter.js';
 
-function main(params: OWParams): OWResponse {
-  // const req = new Request(process.env.)
-  console.log('hello log: ', params);
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'text/plain' },
-    body: 'hello'
-  }
-};
-
-export {
-  main
+// exported for dev server
+export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Response> {
+  return new Response(`path: ${ctx.pathInfo.suffix}`, { status: 200, headers: { 'content-type': 'text/plain' } });
 }
+
+// eslint-disable-next-line
+export const main = (wrap as any)(createAdapter({ factory: () => run }));

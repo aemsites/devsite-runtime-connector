@@ -10,15 +10,75 @@
  * governing permissions and limitations under the License.
  */
 
-import typescript from '@rollup/plugin-typescript';
+/* eslint-disable import/no-extraneous-dependencies */
 
-export default {
+import typescript from '@rollup/plugin-typescript';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import { RollupOptions, Plugin } from 'rollup';
+import fs from 'fs';
+
+const fetchPkgJson = fs.readFileSync('./node_modules/@adobe/fetch/package.json', 'utf8');
+
+/**
+ * Workaround plugin for `createRequire` usage in @adobe/fetch
+ */
+function adobeFetchPlugin(): Plugin {
+  return {
+    name: 'adobe-fetch-plugin',
+    resolveId(source, importer) {
+      if (source === 'module' && importer.includes('@adobe/fetch')) {
+        return source;
+      }
+      return null;
+    },
+    load(id) {
+      if (id === 'module') {
+        return `export const createRequire = () => () => { return ${fetchPkgJson} };`;
+      }
+      return null;
+    },
+  };
+}
+
+/**
+ * Ignores universal's main import,
+ * the openwhisk adapter is applied manually.
+ */
+function helixUniversalPlugin(): Plugin {
+  return {
+    name: 'helix-universal-plugin',
+    resolveId(source, importer) {
+      if (source === './main.js' && importer.includes('@adobe/helix-universal')) {
+        return source;
+      }
+      return null;
+    },
+    load(id) {
+      if (id === './main.js') {
+        return 'export const main = () => { throw Error("main.js loaded by helix-universal"); }';
+      }
+      return null;
+    },
+  };
+}
+
+const opts: RollupOptions = {
   input: 'src/index.ts',
-  sourcemap: false,
   output: {
+    inlineDynamicImports: true,
+    sourcemap: false,
     file: 'dist/index.js',
     format: 'esm',
-    strict: false
+    strict: false,
   },
-  plugins: [typescript()]
+  plugins: [
+    adobeFetchPlugin(),
+    helixUniversalPlugin(),
+    typescript(),
+    commonjs(),
+    nodeResolve({ preferBuiltins: true, browser: false }),
+  ],
 };
+
+export default opts;
