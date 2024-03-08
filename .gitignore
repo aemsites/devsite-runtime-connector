@@ -27,6 +27,7 @@ junit.xml
 coverage
 .aws.tmp.creds.json
 .wskdebug.props.tmp
+junit
 
 # Parcel
 .parcel-cache

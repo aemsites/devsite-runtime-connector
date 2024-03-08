@@ -10,32 +10,12 @@
  * governing permissions and limitations under the License.
  */
 
-import type { Root as MDastRoot } from 'mdast';
-import type { Nodes as HastNodes } from 'hast';
+/* eslint-disable */
 
-export interface Content {
-  md?: string;
-  mdast?: MDastRoot;
-  hast?: HastNodes;
-  html?: string;
-}
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
-declare module 'mdast' {
-  interface RootContentMap {
-    section: {
-      type: 'section';
-      children: RootContent[];
-    }
-  }
-}
+chai.use(chaiAsPromised);
 
-declare module '@adobe/helix-universal' {
-  namespace Helix {
-    export interface UniversalContext {
-      data: Record<string, unknown>;
-      attributes: {
-        content?: Content;
-      }
-    }
-  }
-}
+globalThis.expect = chai.expect;
+globalThis.assert = chai.assert;

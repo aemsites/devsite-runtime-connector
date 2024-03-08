@@ -25,8 +25,15 @@ module.exports = {
     'import/extensions': ['error', {
       js: 'always',
     }],
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
   },
   overrides: [
+    {
+      files: ['src/**/*'],
+      rules: {
+        'import/no-extraneous-dependencies': ['error', { devDependencies: false }],
+      },
+    },
     {
       files: ['*.ts'],
       extends: [
@@ -43,6 +50,7 @@ module.exports = {
         'no-use-before-define': 'off',
         '@typescript-eslint/no-use-before-define': 'error',
         'no-shadow': 'off',
+        indent: 'off',
         '@typescript-eslint/no-shadow': 'error',
         '@typescript-eslint/no-unsafe-assignment': 'warn',
         '@typescript-eslint/no-unsafe-call': 'warn',
@@ -55,13 +63,14 @@ module.exports = {
           },
         ],
         '@typescript-eslint/require-await': 'warn',
+        'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+        'import/extensions': ['error', {
+          js: 'always',
+        }],
       },
       settings: {
         'import/resolver': {
-          typescript: {
-            // alwaysTryTypes: true,
-            // project: './tsconfig.json',
-          },
+          typescript: {},
         },
       },
       parserOptions: {

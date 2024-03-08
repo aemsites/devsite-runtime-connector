@@ -39,6 +39,39 @@ export function toMdast(ctx: Helix.UniversalContext) {
   dereference(content.mdast);
 }
 
+export function splitSections(ctx: Helix.UniversalContext) {
+  const { content: { mdast } } = ctx.attributes;
+
+  // filter all children that are break blocks
+  const dividers = mdast.children.filter((node) => node.type === 'thematicBreak')
+    // then get their index in the list of children
+    .map((node) => mdast.children.indexOf(node));
+
+  // find pairwise permutations of spaces between blocks
+  // include the very start and end of the document
+  const starts = [0, ...dividers];
+  const ends = [...dividers, mdast.children.length];
+
+  // content.mdast.children = _.zip(starts, ends)
+  mdast.children = starts.map((k, i) => [k, ends[i]])
+    // but filter out empty section
+    .filter(([start, end]) => start !== end)
+    // then return all nodes that are in between
+    .map(([start, end]) => {
+      // skip 'thematicBreak' nodes
+      const index = mdast.children[start].type === 'thematicBreak' ? start + 1 : start;
+      return {
+        type: 'section',
+        children: mdast.children.slice(index, end),
+      };
+    });
+
+  // unwrap sole section directly on the root
+  if (mdast.children.length === 1 && mdast.children[0].type === 'section') {
+    mdast.children = mdast.children[0].children;
+  }
+}
+
 export function toHast(ctx: Helix.UniversalContext) {
   const { content } = ctx.attributes;
   content.hast = mdast2hast(content.mdast, {
@@ -64,18 +97,43 @@ export function toHast(ctx: Helix.UniversalContext) {
   content.hast = raw(content.hast);
 }
 
+function wrapHtml(content: string): string {
+  return `\
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/scripts/aem.js" type="module"></script>
+    <script src="/scripts/scripts.js" type="module"></script>
+    <link rel="stylesheet" href="/styles/styles.css">
+  </head>
+  <body>
+    <header></header>
+    <main>
+${content
+      .split('\n')
+      .filter((line, i, arr) => (i !== 0 && i !== arr.length - 1) || !!line.trim())
+      .map((line) => `        ${line}`).join('\n')}
+    </main>
+    <footer></footer>
+  </body>
+</html>`;
+}
+
 export function stringify(ctx: Helix.UniversalContext) {
   const { content } = ctx.attributes;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
   rehypeFormat()(content.hast as any);
 
-  content.html = toHtml(content.hast, {
+  content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  });
+  }));
 }
 
 export default function md2markup(ctx: Helix.UniversalContext) {
   toMdast(ctx);
+  splitSections(ctx);
   toHast(ctx);
   stringify(ctx);
   return ctx.attributes.content.html;

@@ -10,32 +10,27 @@
  * governing permissions and limitations under the License.
  */
 
-import type { Root as MDastRoot } from 'mdast';
-import type { Nodes as HastNodes } from 'hast';
+import type { Helix } from '@adobe/helix-universal';
 
-export interface Content {
-  md?: string;
-  mdast?: MDastRoot;
-  hast?: HastNodes;
-  html?: string;
-}
+export const DEFAULT_CONTEXT = (
+  overrides: Record<string, unknown> = {},
+): Helix.UniversalContext => {
+  return {
+    attributes: {},
+    ...overrides,
+  } as unknown as Helix.UniversalContext;
+};
 
-declare module 'mdast' {
-  interface RootContentMap {
-    section: {
-      type: 'section';
-      children: RootContent[];
-    }
+export function minifyHtml(html: string, mainOnly = true): string {
+  let input = html;
+  if (mainOnly) {
+    input = html.includes('<main>') ? html.split('<main>')[1] : html;
+    [input] = input.split('</main>');
   }
-}
 
-declare module '@adobe/helix-universal' {
-  namespace Helix {
-    export interface UniversalContext {
-      data: Record<string, unknown>;
-      attributes: {
-        content?: Content;
-      }
-    }
-  }
+  return input
+    .replace(/\n/g, '')
+    .replace(/>\s+</g, '><')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }

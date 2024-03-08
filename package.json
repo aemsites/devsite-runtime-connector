@@ -19,6 +19,7 @@
   "devDependencies": {
     "@adobe/aio-cli": "10.0.0",
     "@adobe/eslint-config-helix": "2.0.6",
+    "@adobe/helix-universal": "4.5.0",
     "@adobe/helix-universal-devserver": "1.1.9",
     "@babel/core": "7.24.0",
     "@babel/eslint-parser": "7.23.10",
@@ -31,12 +32,17 @@
     "@semantic-release/git": "10.0.1",
     "@semantic-release/npm": "11.0.3",
     "@semantic-release/release-notes-generator": "12.1.0",
+    "@types/chai": "4.3.12",
     "@types/hast": "3.0.4",
     "@types/mdast": "4.0.3",
+    "@types/mocha": "10.0.6",
     "@types/node": "20.11.25",
     "@types/unist": "3.0.2",
     "@typescript-eslint/eslint-plugin": "7.1.1",
     "@typescript-eslint/parser": "7.1.1",
+    "c8": "9.1.0",
+    "chai": "4.4.1",
+    "chai-as-promised": "7.1.1",
     "dotenv": "16.4.5",
     "dotenv-cli": "7.4.0",
     "eslint": "8.57.0",
@@ -44,6 +50,8 @@
     "eslint-plugin-import": "2.29.1",
     "husky": "9.0.11",
     "lint-staged": "15.2.2",
+    "mocha": "10.3.0",
+    "mocha-multi-reporters": "1.5.1",
     "nodemon": "3.1.0",
     "rollup": "4.12.1",
     "ts-node": "10.9.2",
@@ -55,7 +63,7 @@
     "build": "rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "bundle": "aio app build",
     "dev": "nodemon -w src -w test -e js,ts,cjs,mjs --exec 'node --loader ts-node/esm --no-warnings test/dev/server.ts'",
-    "test": "exit 0;",
+    "test": "TS_NODE_PROJECT='./tsconfig.json' c8 mocha",
     "deploy": "dotenv -- aio app deploy",
     "prepare": "husky install"
   },
@@ -64,5 +72,26 @@
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs}": "eslint"
+  },
+  "mocha": {
+    "extension": [
+      "js",
+      "jsx",
+      "ts",
+      "tsx"
+    ],
+    "recursive": "true",
+    "reporter": "mocha-multi-reporters",
+    "reporter-options": "configFile=.mocha-multi.json",
+    "spec": [
+      "test/**/*.test.{js,ts,jsx,tsx}"
+    ],
+    "require": [
+      "./test/pretest.cjs"
+    ],
+    "node-option": [
+      "loader=ts-node/esm",
+      "no-warnings"
+    ]
   }
 }
