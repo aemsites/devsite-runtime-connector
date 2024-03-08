@@ -13,12 +13,25 @@
 import type { Helix } from '@adobe/helix-universal';
 import wrap from '@adobe/helix-shared-wrap';
 import { Request, Response } from '@adobe/fetch';
+import testmd from './testmd.js';
 // eslint-disable-next-line
 import { createAdapter } from '../node_modules/@adobe/helix-universal/src/openwhisk-adapter.js';
+import md2markup from './md2markup.js';
 
 // exported for dev server
 export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Response> {
-  return new Response(`path: ${ctx.pathInfo.suffix}`, { status: 200, headers: { 'content-type': 'text/plain' } });
+  ctx.attributes ??= {};
+  ctx.attributes.content ??= {
+    md: testmd,
+  };
+
+  const html = md2markup(ctx);
+  // try {
+  // } catch (e) {
+  //   return new Response((e as Error).message,
+  // { status: 500, headers: { 'content-type': 'text/plain' } });
+  // }
+  return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
 }
 
 // eslint-disable-next-line

@@ -5,7 +5,16 @@
   "private": true,
   "dependencies": {
     "@adobe/fetch": "4.1.1",
-    "@adobe/helix-shared-wrap": "2.0.1"
+    "@adobe/helix-markdown-support": "7.1.0",
+    "@adobe/helix-shared-wrap": "2.0.1",
+    "@adobe/mdast-util-gridtables": "4.0.1",
+    "@adobe/remark-gridtables": "3.0.1",
+    "hast-util-raw": "9.0.2",
+    "hast-util-to-html": "9.0.0",
+    "mdast-util-to-hast": "13.1.0",
+    "rehype-format": "5.0.0",
+    "remark-parse": "11.0.0",
+    "unified": "11.0.4"
   },
   "devDependencies": {
     "@adobe/aio-cli": "10.0.0",
@@ -22,7 +31,10 @@
     "@semantic-release/git": "10.0.1",
     "@semantic-release/npm": "11.0.3",
     "@semantic-release/release-notes-generator": "12.1.0",
+    "@types/hast": "3.0.4",
+    "@types/mdast": "4.0.3",
     "@types/node": "20.11.25",
+    "@types/unist": "3.0.2",
     "@typescript-eslint/eslint-plugin": "7.1.1",
     "@typescript-eslint/parser": "7.1.1",
     "dotenv": "16.4.5",

@@ -44,6 +44,9 @@ module.exports = {
         '@typescript-eslint/no-use-before-define': 'error',
         'no-shadow': 'off',
         '@typescript-eslint/no-shadow': 'error',
+        '@typescript-eslint/no-unsafe-assignment': 'warn',
+        '@typescript-eslint/no-unsafe-call': 'warn',
+        '@typescript-eslint/no-unsafe-argument': 'warn',
         '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
         '@typescript-eslint/no-misused-promises': [
           'error',
@@ -56,8 +59,8 @@ module.exports = {
       settings: {
         'import/resolver': {
           typescript: {
-            alwaysTryTypes: true,
-            project: './tsconfig.json',
+            // alwaysTryTypes: true,
+            // project: './tsconfig.json',
           },
         },
       },
