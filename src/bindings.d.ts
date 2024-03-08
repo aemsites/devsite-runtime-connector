@@ -14,7 +14,7 @@ import type { Nodes as MDastNodes } from 'mdast';
 import type { Nodes as HastNodes } from 'hast';
 
 export interface Content {
-  md: string;
+  md?: string;
   mdast?: MDastNodes;
   hast?: HastNodes;
   html?: string;
@@ -23,6 +23,7 @@ export interface Content {
 declare module '@adobe/helix-universal' {
   namespace Helix {
     export interface UniversalContext {
+      data: Record<string, unknown>;
       attributes: {
         content?: Content;
       }

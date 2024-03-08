@@ -13,24 +13,44 @@
 import type { Helix } from '@adobe/helix-universal';
 import wrap from '@adobe/helix-shared-wrap';
 import { Request, Response } from '@adobe/fetch';
-import testmd from './testmd.js';
 // eslint-disable-next-line
 import { createAdapter } from '../node_modules/@adobe/helix-universal/src/openwhisk-adapter.js';
 import md2markup from './md2markup.js';
 
+// test urls
+// http://localhost:3000/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=main/src/pages
+// https://53444-842orangechinchilla.adobeioruntime.net/api/v1/web/md2markup/main/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=/main/src/pages
+
 // exported for dev server
 export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Response> {
+  const { log } = ctx;
   ctx.attributes ??= {};
-  ctx.attributes.content ??= {
-    md: testmd,
-  };
+  ctx.attributes.content ??= {};
+  const [_, owner, repo, ...rest] = ctx.pathInfo.suffix.split('/');
+  if (!owner || !repo) {
+    return new Response('', { status: 400, headers: { 'x-error': 'owner and repo are required' } });
+  }
 
+  const url = new URL(req.url);
+  let rootPath = url.searchParams.has('root') ? url.searchParams.get('root') : '/';
+  if (!rootPath.endsWith('/')) {
+    rootPath += '/';
+  }
+  if (!rootPath.startsWith('/')) {
+    rootPath = `/${rootPath}`;
+  }
+  const path = `${rootPath}${rest.join('/')}`.replaceAll('//', '/');
+  const mdUrl = `https://raw.githubusercontent.com/${owner}/${repo}${path.startsWith('/') ? '' : '/'}${path}`;
+  log.debug('mdUrl: ', mdUrl);
+
+  const res = await fetch(mdUrl);
+  if (!res.ok) {
+    const status = res.status < 500 ? res.status : 500;
+    return new Response('', { status, headers: { 'x-error': `failed to fetch markdown (${res.status})` } });
+  }
+
+  ctx.attributes.content.md = await res.text();
   const html = md2markup(ctx);
-  // try {
-  // } catch (e) {
-  //   return new Response((e as Error).message,
-  // { status: 500, headers: { 'content-type': 'text/plain' } });
-  // }
   return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
 }
 
