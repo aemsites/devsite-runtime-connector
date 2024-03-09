@@ -46,6 +46,10 @@ describe('md2markup', () => {
     await runTest('simple-block');
   });
 
+  it('should convert markdown to markup (repeat-block)', async () => {
+    await runTest('repeat-block');
+  });
+
   it.skip('should convert markdown to markup (page)', async () => {
     await runTest('page');
   });

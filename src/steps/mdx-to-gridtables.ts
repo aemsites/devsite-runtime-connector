@@ -11,6 +11,7 @@
  */
 
 import { Helix } from '@adobe/helix-universal';
+import type { MdxJsxFlowElement, MdxJsxAttribute, MdxJsxExpressionAttribute } from 'mdast-util-mdx-jsx';
 import type { RootContent } from 'mdast';
 
 function makeGridTableRow(child: RootContent): RootContent {
@@ -25,6 +26,14 @@ function makeGridTableRow(child: RootContent): RootContent {
   } as unknown as RootContent;
 }
 
+function getAttribute(node: MdxJsxFlowElement, name: string) {
+  return node.attributes.find((attr) => (attr as { name: string }).name === name);
+}
+
+function getAttributeValue(attr: MdxJsxAttribute | MdxJsxExpressionAttribute, fallback?: string) {
+  return attr && attr.value && typeof attr.value === 'string' ? attr.value : fallback;
+}
+
 export default function mdxToBlocks(ctx: Helix.UniversalContext) {
   const { content: { mdast } } = ctx.attributes;
 
@@ -36,48 +45,56 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     }
 
     // get slots
-    const slotsAttr = node.attributes.find((attr) => (attr as { name: string }).name === 'slots');
-    if (!slotsAttr || typeof slotsAttr.value !== 'string') {
+    const slotsAttr = getAttribute(node, 'slots');
+    const slotsValue = getAttributeValue(slotsAttr, '');
+    if (!slotsValue) {
       // TODO: throw error for invalid document
       break;
     }
-    const slots = (slotsAttr.value).split(',');
+    const slots = slotsValue.split(',');
+
+    // repeat the block N times if repeat="N" is set
+    const repeatAttr = getAttribute(node, 'repeat');
+    const repeat = parseInt(getAttributeValue(repeatAttr, '1'), 10);
 
     // get variants as string
-    const variantAttr = node.attributes.find((attr) => (attr as { name: string }).name === 'variant');
-    const variants = variantAttr?.value ? variantAttr.value as string : '';
+    const variantAttr = getAttribute(node, 'variant');
+    const variants = getAttributeValue(variantAttr, '');
 
     // block name is the JSX nodename
     const blockName = node.name;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    mdast.children.splice(i, 1 + slots.length, {
+    const totalRows = repeat * slots.length;
+    const slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
+    if (slotsToInsert.length !== totalRows) {
+      // TODO: throw error for invalid slots?
+    }
+
+    mdast.children.splice(i, 1 + slotsToInsert.length, {
       type: 'gridTable',
-      children: [
-        {
-          type: 'gtBody',
-          children: [
-            // first is the header, containing block name
-            {
-              type: 'paragraph',
-              children: [
-                {
-                  type: 'strong',
-                  children: [
-                    {
-                      type: 'text',
-                      value: `${blockName} (${variants})`,
-                    },
-                  ],
-                },
-              ],
-            },
-            // remaining is the content from the slots
-            // each slot is inserted as a separate row
-            ...mdast.children
-              .slice(i + 1, i + 1 + slots.length)]
-            .map(makeGridTableRow),
-        }],
+      children: [{
+        type: 'gtBody',
+        children: [
+          // first is the header, containing block name
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'strong',
+                children: [
+                  {
+                    type: 'text',
+                    value: `${blockName} (${variants})`,
+                  },
+                ],
+              },
+            ],
+          },
+          // remaining is the content from the slots
+          // each slot is inserted as a separate row
+          ...slotsToInsert,
+        ].map(makeGridTableRow),
+      }],
     } as unknown as RootContent);
   }
 }
