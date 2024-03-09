@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/aemsites/devsite-runtime-connector/compare/v1.0.1...v1.0.2) (2024-03-09)
+
+
+### Bug Fixes
+
+* wrap tables in table blocks ([6685bf6](https://github.com/aemsites/devsite-runtime-connector/commit/6685bf6c7dd7c63c215fd0d83f0ad11a253463a9))
+
 ## [1.0.1](https://github.com/aemsites/devsite-runtime-connector/compare/v1.0.0...v1.0.1) (2024-03-09)
 
 
