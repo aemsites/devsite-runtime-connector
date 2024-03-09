@@ -2,6 +2,29 @@
 <html>
 
 <head>
+  <title>Manage company users</title>
+  <link rel="canonical"
+    href="https://main--commerce-webapi-test--aemsites.hlx.page/commerce/webapi/rest/b2b/company-users">
+  <meta name="description" content="Manage which companies a user belongs to">
+  <meta name="keywords" content="B2B, REST">
+  <meta property="og:title" content="Manage company users">
+  <meta property="og:description" content="Manage which companies a user belongs to">
+  <meta property="og:url"
+    content="https://main--commerce-webapi-test--aemsites.hlx.page/commerce/webapi/rest/b2b/company-users">
+  <meta property="og:image"
+    content="https://main--commerce-webapi-test--aemsites.hlx.page/default-meta-image.png?width=1200&#x26;format=pjpg&#x26;optimize=medium">
+  <meta property="og:image:secure_url"
+    content="https://main--commerce-webapi-test--aemsites.hlx.page/default-meta-image.png?width=1200&#x26;format=pjpg&#x26;optimize=medium">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Manage company users">
+  <meta name="twitter:description" content="Manage which companies a user belongs to">
+  <meta name="twitter:image"
+    content="https://main--commerce-webapi-test--aemsites.hlx.page/default-meta-image.png?width=1200&#x26;format=pjpg&#x26;optimize=medium">
+  <meta name="edition" content="ee">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="/scripts/aem.js" type="module"></script>
+  <script src="/scripts/scripts.js" type="module"></script>
+  <link rel="stylesheet" href="/styles/styles.css">
 </head>
 
 <body>
@@ -10,11 +33,10 @@
     <div>
       <h1 id="manage-company-users">Manage company users</h1>
       <p>A company user is a customer (buyer) that is assigned extended attributes that identify the company the user
-        belongs to. Use the <code>POST /V1/customers</code> call, which is included with &#x3C;Vars.sitedatavarce/> and
-        &#x3C;Vars.sitedatavaree/>, to create the user. After the user is created, you can use the
+        belongs to. Use the <code>POST /V1/customers</code> call, which is included with {{Vars.sitedatavarce}} and
+        {{Vars.sitedatavaree}}, to create the user. After the user is created, you can use the
         <code>PUT /V1/customers/:customer_id</code> call to set their company data with the
-        <code>company_attributes</code> extended attributes.
-      </p>
+        <code>company_attributes</code> extended attributes.</p>
       <div class="alert info">
         <div>
           <div>This topic discusses only the features of the <code>customerCustomerRepositoryV1</code> service that are
@@ -72,15 +94,15 @@ PUT /V1/customers/:customerId
       </div>
       <h3 id="create-a-company-user">Create a company user</h3>
       <p>The <code>POST /V1/customers</code> call creates an Adobe Commerce customer. B2B extends the
-        <code>customerAccountManagementV1</code> service so that you can create a company user.
-      </p>
+        <code>customerAccountManagementV1</code> service so that you can create a company user.</p>
       <p><strong>Sample Usage:</strong></p>
       <p><code>POST &#x3C;host>/rest/&#x3C;store_code>/V1/customers</code></p>
       <p>First, create the standard customer. Their <code>company_id</code> will initially be set to <code>0</code>.</p>
       <div class="code-block tabs">
         <div>
-          <div>Payload</div>
-          <div>Response</div>
+          <div>
+            <h4 id="payload">Payload</h4>
+          </div>
         </div>
         <div>
           <div>
@@ -93,6 +115,13 @@ PUT /V1/customers/:customerId
 }
 </code></pre>
           </div>
+        </div>
+        <div>
+          <div>
+            <h4 id="response">Response</h4>
+          </div>
+        </div>
+        <div>
           <div>
             <pre><code>{
   "id": 13,
@@ -121,16 +150,16 @@ PUT /V1/customers/:customerId
       <p>If you create a user from the admin dashboard, you can also set their company data at the same time.</p>
       <h3 id="modify-a-company-user">Modify a company user</h3>
       <p>The following example assigns the user to a company, sets their status to inactive and also sets their
-        <code>job_title</code> and <code>telephone</code>.
-      </p>
+        <code>job_title</code> and <code>telephone</code>.</p>
       <p>If you change the <code>status</code> to inactive, the account is locked. If the company user has child users,
         the system re-assigns the child users to the parent of the deactivated user.</p>
       <p><strong>Sample Usage:</strong></p>
       <p><code>PUT &#x3C;host>/rest/&#x3C;store_code>/V1/customers/13</code></p>
       <div class="code-block tabs">
         <div>
-          <div>Payload</div>
-          <div>Response</div>
+          <div>
+            <h4 id="payload-1">Payload</h4>
+          </div>
         </div>
         <div>
           <div>
@@ -153,6 +182,13 @@ PUT /V1/customers/:customerId
 }
 </code></pre>
           </div>
+        </div>
+        <div>
+          <div>
+            <h4 id="response-1">Response</h4>
+          </div>
+        </div>
+        <div>
           <div>
             <pre><code>{
   "id": 13,
@@ -192,14 +228,22 @@ PUT /V1/customers/:customerId
       <p><code>DELETE &#x3C;host>/rest/&#x3C;store_code>/V1/customers/13</code></p>
       <div class="code-block tabs">
         <div>
-          <div>Payload</div>
-          <div>Response</div>
+          <div>
+            <h4 id="payload-2">Payload</h4>
+          </div>
         </div>
         <div>
           <div>
             <pre><code>// Not applicable
 </code></pre>
           </div>
+        </div>
+        <div>
+          <div>
+            <h4 id="response-2">Response</h4>
+          </div>
+        </div>
+        <div>
           <div>
             <pre><code>// `true`, indicating the request was successful
 

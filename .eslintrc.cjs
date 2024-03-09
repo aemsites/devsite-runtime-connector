@@ -88,5 +88,12 @@ module.exports = {
         'header/header': 'off',
       },
     },
+    {
+      files: ['test/**/*'],
+      rules: {
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+      },
+    },
   ],
 };

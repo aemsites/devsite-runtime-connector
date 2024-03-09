@@ -93,9 +93,13 @@ function tableToDivs($table) {
 
 /**
  * Converts tables into page blocks.
+ * @param {import('@adobe/helix-universal').Helix.UniversalContext} ctx
  */
-export default function createPageBlocks({ attributes: { content: { hast } } }) {
-  visit(hast, (node, idx, parent) => {
+export default function createPageBlocks(ctx) {
+  const { attributes: { content: { hast } } } = ctx;
+  /** @type {import('../bindings').Content['hast']} */
+  const phast = hast;
+  visit(phast, (node, idx, parent) => {
     if (node.tagName === 'table' && parent.tagName === 'div') {
       parent.children[idx] = tableToDivs(node);
       return SKIP;

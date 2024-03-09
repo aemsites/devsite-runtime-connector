@@ -21,7 +21,7 @@ import md2markup from './md2markup.js';
 // http://localhost:3000/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=main/src/pages
 // https://53444-842orangechinchilla.adobeioruntime.net/api/v1/web/md2markup/main/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=/main/src/pages
 
-// exported for dev server
+// exported for dev server & tests
 export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Response> {
   const { log } = ctx;
   ctx.attributes ??= {};
@@ -54,5 +54,5 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
 }
 
-// eslint-disable-next-line
+/* eslint-disable */
 export const main = (wrap as any)(createAdapter({ factory: () => run }));

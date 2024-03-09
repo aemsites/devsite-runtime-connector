@@ -19,6 +19,8 @@ import splitSections from './steps/split-sections.js';
 import stringify from './steps/stringify.js';
 import toMdast from './steps/to-mdast.js';
 import toHast from './steps/to-hast.js';
+import removeMdxVars from './steps/remove-mdx-vars.js';
+import removeCodeClasses from './steps/remove-code-classes.js';
 
 /**
  * Converts markdown to markup.
@@ -33,9 +35,11 @@ import toHast from './steps/to-hast.js';
  */
 export default function md2markup(ctx: Helix.UniversalContext) {
   toMdast(ctx);
+  removeMdxVars(ctx);
   mdxToGridtables(ctx); // must come before splitSections
   splitSections(ctx);
   toHast(ctx);
+  removeCodeClasses(ctx);
   fixSections(ctx);
   createPageBlocks(ctx);
   stringify(ctx);

@@ -41,7 +41,8 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
   for (let i = 0; i < mdast.children.length; i += 1) {
     const node = mdast.children[i];
     if (node.type !== 'mdxJsxFlowElement') {
-      return;
+      // eslint-disable-next-line no-continue
+      continue;
     }
 
     // get slots

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Manage company users</title>
+  <link rel="canonical"
+    href="https://main--commerce-webapi-test--aemsites.hlx.page/commerce/webapi/rest/b2b/company-users">
+  <meta name="description" content="Manage which companies a user belongs to">
+  <meta name="keywords" content="B2B, REST">
+  <meta property="og:title" content="Manage company users">
+  <meta property="og:description" content="Manage which companies a user belongs to">
+  <meta property="og:url"
+    content="https://main--commerce-webapi-test--aemsites.hlx.page/commerce/webapi/rest/b2b/company-users">
+  <meta property="og:image"
+    content="https://main--commerce-webapi-test--aemsites.hlx.page/default-meta-image.png?width=1200&#x26;format=pjpg&#x26;optimize=medium">
+  <meta property="og:image:secure_url"
+    content="https://main--commerce-webapi-test--aemsites.hlx.page/default-meta-image.png?width=1200&#x26;format=pjpg&#x26;optimize=medium">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Manage company users">
+  <meta name="twitter:description" content="Manage which companies a user belongs to">
+  <meta name="twitter:image"
+    content="https://main--commerce-webapi-test--aemsites.hlx.page/default-meta-image.png?width=1200&#x26;format=pjpg&#x26;optimize=medium">
+  <meta name="edition" content="ee">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="/scripts/aem.js" type="module"></script>
+  <script src="/scripts/scripts.js" type="module"></script>
+  <link rel="stylesheet" href="/styles/styles.css">
+</head>
+
+<body>
+  <header></header>
+  <main>
+    <div>
+      <h1>Manage company users</h1>
+      <p>A company user is a customer (buyer) that is assigned extended attributes that identify the company the user
+        belongs to. Use the <code>POST /V1/customers</code> call, which is included with {{Vars.sitedatavarce}} and
+        {{Vars.sitedatavaree}}, to create the user. After the user is created, you can use the
+        <code>PUT /V1/customers/:customer_id</code> call to set their company data with the
+        <code>company_attributes</code> extended attributes.
+      </p>
+      <div class="inlinealert info">
+        <div>
+          <div>This topic discusses only the features of the <code>customerCustomerRepositoryV1</code> service that are
+            specific to B2B. See <a href="/tutorials/orders/order-create-customer">Create a customer</a> for an example
+            of creating a standard customer.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer></footer>
+</body>
+
+</html>

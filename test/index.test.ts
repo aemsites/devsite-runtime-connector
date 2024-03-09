@@ -10,14 +10,15 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable */
+import { main } from '../src/index.js';
+import { OWParams, OWResponse, OW_PARAMS } from './util.js';
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+const mainFn = main as (params: OWParams) => Promise<OWResponse>;
 
-chai.use(chaiAsPromised);
-
-globalThis.expect = chai.expect;
-globalThis.assert = chai.assert;
-
-process.env.__OW_ACTION_NAME = 'md2markup/test';
+describe('index', () => {
+  it('responds 400 to invalid path', async () => {
+    const resp = await mainFn(OW_PARAMS({ suffix: '/invalid' }));
+    expect(resp.statusCode).to.equal(400);
+    expect(resp.headers['x-error']).to.equal('owner and repo are required');
+  });
+});

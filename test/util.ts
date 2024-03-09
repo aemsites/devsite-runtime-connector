@@ -12,6 +12,21 @@
 
 import type { Helix } from '@adobe/helix-universal';
 
+export interface OWParams {
+  __ow_method: string;
+  __ow_headers: Record<string, string>;
+  __ow_path: string;
+  __ow_body: string;
+  __ow_query: string;
+}
+
+export interface OWResponse {
+  statusCode: number;
+  body: string;
+  headers: Record<string, string>;
+  error?: string;
+}
+
 export const DEFAULT_CONTEXT = (
   overrides: Record<string, unknown> = {},
 ): Helix.UniversalContext => {
@@ -19,6 +34,24 @@ export const DEFAULT_CONTEXT = (
     attributes: {},
     ...overrides,
   } as unknown as Helix.UniversalContext;
+};
+
+export const OW_PARAMS = (
+  overrides: {
+    method?: string;
+    headers?: Record<string, string>;
+    suffix?: string;
+    rawBody?: string;
+    query?: string;
+  } = {},
+): OWParams => {
+  return {
+    __ow_method: overrides.method || 'GET',
+    __ow_headers: overrides.headers || {},
+    __ow_path: overrides.suffix || '',
+    __ow_body: overrides.rawBody || '',
+    __ow_query: overrides.query || '',
+  };
 };
 
 export function minifyHtml(html: string, mainOnly = true): string {

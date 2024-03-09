@@ -1,0 +1,97 @@
+<h1>Manage company users</h1>
+<p>A company user is a customer (buyer) that is assigned extended attributes that identify the company the user belongs
+  to. Use the <code>POST /V1/customers</code> call, which is included with {{Vars.sitedatavarce}} and
+  {{Vars.sitedatavaree}}, to create the user. After the user is created, you can use the
+  <code>PUT /V1/customers/:customer_id</code> call to set their company data with the <code>company_attributes</code>
+  extended attributes.</p>
+<div></div>
+<p>This topic discusses only the features of the <code>customerCustomerRepositoryV1</code> service that are specific to
+  B2B. See <a href="../tutorials/orders/order-create-customer.md">Create a customer</a> for an example of creating a
+  standard customer.</p>
+<h2>Managing company users with REST</h2>
+<p>This section describes the REST endpoints used to manage company users.</p>
+<p><strong>Service Name:</strong></p>
+<p><code>customerCustomerRepositoryV1</code></p>
+<p><strong>REST Endpoints:</strong></p>
+<pre><code>POST /V1/customers/ PUT /V1/customers/:customerId </code></pre>
+<p><strong>Company user parameters:</strong></p>
+<p>The following table lists the parameters that can be used to set company data for a user.</p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Format</th>
+      <th>Requirements</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>customer_id</code></td>
+      <td>System-generated customer ID.</td>
+      <td>integer</td>
+      <td>Not applicable for create operations.</td>
+    </tr>
+    <tr>
+      <td><code>company_id</code></td>
+      <td>System-generated company ID.</td>
+      <td>integer</td>
+      <td>Required to create or update a company user.</td>
+    </tr>
+    <tr>
+      <td><code>job_title</code></td>
+      <td>A string that describes the company user's responsibilities.</td>
+      <td>string</td>
+      <td>Required to create or update a company.</td>
+    </tr>
+    <tr>
+      <td><code>status</code></td>
+      <td>Indicates whether the company user is active or inactive</td>
+      <td>integer</td>
+      <td><code>0</code> - inactive; <code>1</code> - active</td>
+    </tr>
+    <tr>
+      <td><code>telephone</code></td>
+      <td>Telephone number</td>
+      <td>string</td>
+      <td>Required to create a company user.</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Create a company user</h3>
+<p>The <code>POST /V1/customers</code> call creates an Adobe Commerce customer. B2B extends the
+  <code>customerAccountManagementV1</code> service so that you can create a company user.</p>
+<p><strong>Sample Usage:</strong></p>
+<p><code>POST &#x3C;host>/rest/&#x3C;store_code>/V1/customers</code></p>
+<p>First, create the standard customer. Their <code>company_id</code> will initially be set to <code>0</code>.</p>
+<div></div>
+<h4>Payload</h4>
+<pre><code>{ "customer": { "email": "mshaw@example.com", "firstname": "Melanie", "lastname": "Shaw" } } </code></pre>
+<h4>Response</h4>
+<pre><code>{ "id": 13, "group_id": 1, "created_at": "2017-05-18 16:47:44", "updated_at": "2017-05-18 16:47:44", "created_in": "Default Store View", "email": "mshaw@example.com", "firstname": "Melanie", "lastname": "Shaw", "store_id": 1, "website_id": 1, "addresses": [], "disable_auto_group_change": 0, "extension_attributes": { "company_attributes": { "customer_id": 13, "company_id": 0 } } } </code></pre>
+<p>If you create a user from the admin dashboard, you can also set their company data at the same time.</p>
+<h3>Modify a company user</h3>
+<p>The following example assigns the user to a company, sets their status to inactive and also sets their
+  <code>job_title</code> and <code>telephone</code>.</p>
+<p>If you change the <code>status</code> to inactive, the account is locked. If the company user has child users, the
+  system re-assigns the child users to the parent of the deactivated user.</p>
+<p><strong>Sample Usage:</strong></p>
+<p><code>PUT &#x3C;host>/rest/&#x3C;store_code>/V1/customers/13</code></p>
+<div></div>
+<h4>Payload</h4>
+<pre><code>{ "customer": { "id": 13, "email": "mshaw@example.com", "firstname": "Melanie", "lastname": "Shaw", "website_id": 1, "extension_attributes": { "company_attributes": { "company_id": 2, "status": 0, "job_title": "Sales Rep", "telephone": "512-555-3322" } } } } </code></pre>
+<h4>Response</h4>
+<pre><code>{ "id": 13, "group_id": 1, "created_at": "2017-05-18 16:47:44", "updated_at": "2017-05-18 18:50:58", "created_in": "Default Store View", "email": "mshaw@example.com", "firstname": "Melanie", "lastname": "Shaw", "store_id": 1, "website_id": 1, "addresses": [], "disable_auto_group_change": 0, "extension_attributes": { "company_attributes": { "customer_id": 13, "company_id": 2, "status": 0, "job_title": "Sales Rep", "telephone": "512-555-3322" }, "is_subscribed": false } } </code></pre>
+<h3>Delete a company user</h3>
+<p>If the specified company user has child users, the system re-assigns the child users to the parent of the deleted
+  user. The user account is deleted from Commerce with all of its content, except quotes and orders. The user's orders
+  and quotes remain visible to the seller.</p>
+<p>Commerce locks the deleted user's quotes and changes their status to Closed. The system does not allow to make
+  changes on such quotes.</p>
+<p><strong>Sample Usage:</strong></p>
+<p><code>DELETE &#x3C;host>/rest/&#x3C;store_code>/V1/customers/13</code></p>
+<div></div>
+<h4>Payload</h4>
+<pre><code>// Not applicable </code></pre>
+<h4>Response</h4>
+<pre><code>// `true`, indicating the request was successful </code></pre>

@@ -10,14 +10,17 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable */
+import type { Helix } from '@adobe/helix-universal';
+import { CONTINUE, visit } from 'unist-util-visit';
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+export default function removeCodeClasses(ctx: Helix.UniversalContext) {
+  const { attributes: { content: { hast } } } = ctx;
 
-chai.use(chaiAsPromised);
+  visit(hast, (node) => {
+    if (node.type === 'element' && node.tagName === 'code') {
+      delete node.properties.className;
+    }
 
-globalThis.expect = chai.expect;
-globalThis.assert = chai.assert;
-
-process.env.__OW_ACTION_NAME = 'md2markup/test';
+    return CONTINUE;
+  });
+}
