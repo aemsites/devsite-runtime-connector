@@ -14,22 +14,33 @@ import { CONTINUE, visit } from 'unist-util-visit';
 import path from 'path';
 import type { Helix } from '@adobe/helix-universal';
 
-function resolve(ctx: Helix.UniversalContext, pathOrUrl: string) {
-  if (!pathOrUrl.startsWith('./') && !pathOrUrl.startsWith('../')) {
+function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | 'a') {
+  if (!pathOrUrl.startsWith('./') && !pathOrUrl.startsWith('../') && !pathOrUrl.startsWith('/')) {
     return pathOrUrl;
   }
 
   const {
     root,
     path: docPath,
+    owner,
+    repo,
   } = ctx.attributes.content;
 
   const cwd = docPath.split('/').slice(0, -1).join('/');
-  let resolved = path.resolve(cwd, pathOrUrl);
+
+  let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
   if (resolved.endsWith('.md')) {
     resolved = resolved.slice(0, -3);
+  } else if (type === 'img') {
+    // use absolute paths for images, since they will be replaced with mediabus paths once ingested
+    if (!resolved.startsWith('/')) {
+      resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
+    }
+    resolved = `/${owner}/${repo}${resolved}`;
   }
-  return resolved.startsWith(root) ? resolved.substring(root.length) : resolved;
+
+  resolved = resolved.startsWith(root) ? resolved.substring(root.length) : resolved;
+  return resolved;
 }
 
 export default function rewriteLinks(ctx: Helix.UniversalContext) {
@@ -47,7 +58,7 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
     const attr = els[node.tagName];
     if (attr) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      node.properties[attr] = resolve(ctx, node.properties[attr] as string);
+      node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
     }
     return CONTINUE;
   });

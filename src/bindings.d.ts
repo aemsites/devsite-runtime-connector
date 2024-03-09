@@ -20,6 +20,8 @@ export interface Content {
   html?: string;
   root?: string;
   path?: string;
+  owner?: string;
+  repo?: string;
 }
 
 declare module 'mdast' {

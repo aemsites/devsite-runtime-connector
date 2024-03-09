@@ -30,6 +30,8 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   if (!owner || !repo) {
     return new Response('', { status: 400, headers: { 'x-error': 'owner and repo are required' } });
   }
+  ctx.attributes.content.owner = owner;
+  ctx.attributes.content.repo = repo;
 
   const url = new URL(req.url);
   let rootPath = url.searchParams.has('root') ? url.searchParams.get('root') : '/';
@@ -45,18 +47,38 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
-  const mdUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main${path}`;
-  log.debug('mdUrl: ', mdUrl);
+  const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main${path}`;
+  log.debug('gitUrl: ', gitUrl);
 
-  const res = await fetch(mdUrl);
+  const res = await fetch(gitUrl);
   if (!res.ok) {
     const status = res.status < 500 ? res.status : 500;
-    return new Response('', { status, headers: { 'x-error': `failed to fetch markdown (${res.status})` } });
+    return new Response('', {
+      status,
+      headers: {
+        'x-error': `failed to fetch from github (${res.status})`,
+      },
+    });
+  }
+
+  if (!path.endsWith('.md')) {
+    // dont convert non-markdown content
+    return new Response(await res.arrayBuffer(), {
+      status: res.status,
+      headers: {
+        'content-type': res.headers.get('content-type'),
+      },
+    });
   }
 
   ctx.attributes.content.md = await res.text();
   const html = md2markup(ctx);
-  return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'content-type': 'text/html',
+    },
+  });
 }
 
 /* eslint-disable */

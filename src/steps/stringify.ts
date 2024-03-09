@@ -21,9 +21,6 @@ function wrapHtml(content: string): string {
   <head>
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="/scripts/aem.js" type="module"></script>
-    <script src="/scripts/scripts.js" type="module"></script>
-    <link rel="stylesheet" href="/styles/styles.css">
   </head>
   <body>
     <header></header>
