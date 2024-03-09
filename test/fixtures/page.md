@@ -105,7 +105,7 @@ If you change the `status` to inactive, the account is locked. If the company us
 
 `PUT <host>/rest/<store_code>/V1/customers/13`
 
-<CodeBlock slots="heading, code" repeat="2" languages="JSON, JSON" />
+<CodeBlock slots="heading, code" variant="tabs" repeat="2" languages="JSON, JSON" />
 
 #### Payload
 
@@ -168,7 +168,7 @@ Commerce locks the deleted user's quotes and changes their status to Closed. The
 
 `DELETE <host>/rest/<store_code>/V1/customers/13`
 
-<CodeBlock slots="heading, code" repeat="2" languages="JSON, JSON" />
+<CodeBlock slots="heading, code"  variant="tabs" repeat="2" languages="JSON, JSON" />
 
 #### Payload
 

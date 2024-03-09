@@ -22,3 +22,8 @@ npm run deploy
 ```
 
 > Note: deploying requires the env vars `AIO_RUNTIME_NAMESPACE` and `AIO_RUNTIME_AUTH` - they can be set in a `.env` file
+
+
+### TODO
+- `tableToGridtable` step to wrap md tables in gridtables to be treated as a `table` block
+- better test assertions for whitespace differences
