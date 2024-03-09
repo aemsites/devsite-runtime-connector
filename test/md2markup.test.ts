@@ -61,7 +61,7 @@ describe('md2markup', () => {
     await runTest('partial', undefined, '/b2b/company-users.md');
   });
 
-  it.skip('should convert markdown to markup (page)', async () => {
+  it('should convert markdown to markup (page)', async () => {
     await runTest('page', undefined, '/b2b/company-users.md');
   });
 });
