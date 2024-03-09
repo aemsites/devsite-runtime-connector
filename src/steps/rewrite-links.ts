@@ -36,7 +36,8 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
     if (!resolved.startsWith('/')) {
       resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
     }
-    resolved = `/${owner}/${repo}${resolved}`;
+    // TODO: parameterize the runtime prefix, not sure where it's set in helix-universal
+    resolved = `/api/v1/web/md2markup/main/${owner}/${repo}${resolved}`;
   }
 
   resolved = resolved.startsWith(root) ? resolved.substring(root.length) : resolved;
