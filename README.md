@@ -25,5 +25,4 @@ npm run deploy
 
 
 ### TODO
-- `tableToGridtable` step to wrap md tables in gridtables to be treated as a `table` block
 - better test assertions for whitespace differences

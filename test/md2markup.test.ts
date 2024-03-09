@@ -53,6 +53,10 @@ describe('md2markup', () => {
     await runTest('repeat-block');
   });
 
+  it('should convert markdown to markup (table)', async () => {
+    await runTest('table');
+  });
+
   it('should convert markdown to markup (partial)', async () => {
     await runTest('partial', undefined, '/b2b/company-users.md');
   });

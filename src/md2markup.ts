@@ -22,6 +22,7 @@ import toHast from './steps/to-hast.js';
 import removeMdxVars from './steps/remove-mdx-vars.js';
 import removeCodeClasses from './steps/remove-code-classes.js';
 import rewriteLinks from './steps/rewrite-links.js';
+import wrapTableBlocks from './steps/wrap-table-blocks.js';
 
 /**
  * Converts markdown to markup.
@@ -37,6 +38,7 @@ import rewriteLinks from './steps/rewrite-links.js';
 export default function md2markup(ctx: Helix.UniversalContext) {
   toMdast(ctx);
   removeMdxVars(ctx);
+  wrapTableBlocks(ctx);
   mdxToGridtables(ctx); // must come before splitSections
   splitSections(ctx);
   toHast(ctx);
