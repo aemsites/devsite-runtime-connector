@@ -1,0 +1,49 @@
+/*
+ * Copyright 2024 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+import { Helix } from '@adobe/helix-universal';
+import { toHtml } from 'hast-util-to-html';
+import rehypeFormat from 'rehype-format';
+
+function wrapHtml(content: string): string {
+  return `\
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/scripts/aem.js" type="module"></script>
+    <script src="/scripts/scripts.js" type="module"></script>
+    <link rel="stylesheet" href="/styles/styles.css">
+  </head>
+  <body>
+    <header></header>
+    <main>
+${content
+      .split('\n')
+      .filter((line, i, arr) => (i !== 0 && i !== arr.length - 1) || !!line.trim())
+      .map((line) => `        ${line}`).join('\n')}
+    </main>
+    <footer></footer>
+  </body>
+</html>`;
+}
+
+export default function stringify(ctx: Helix.UniversalContext) {
+  const { content } = ctx.attributes;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
+  rehypeFormat()(content.hast as any);
+
+  content.html = wrapHtml(toHtml(content.hast, {
+    upperDoctype: true,
+  }));
+}

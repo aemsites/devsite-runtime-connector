@@ -30,6 +30,7 @@ describe('md2markup', () => {
     ctx.attributes.content.md = await fs.readFile(path.resolve(__dirname, 'fixtures', `${name}.md`), 'utf-8');
     const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', `${name}.html`), 'utf-8');
     const html = md2markup(ctx);
+    // console.log(html);
     expect(minifyHtml(html)).to.equal(minifyHtml(expected));
   }
 
@@ -37,7 +38,11 @@ describe('md2markup', () => {
     await runTest('simple');
   });
 
-  it.skip('should convert markdown to markup (simple-block)', async () => {
+  it('should convert markdown to markup (gridtable)', async () => {
+    await runTest('gridtable');
+  });
+
+  it('should convert markdown to markup (simple-block)', async () => {
     await runTest('simple-block');
   });
 
