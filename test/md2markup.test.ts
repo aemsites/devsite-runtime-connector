@@ -26,7 +26,10 @@ describe('md2markup', () => {
     ctx = DEFAULT_CONTEXT({ attributes: { content: {} } });
   });
 
-  async function runTest(name: string) {
+  async function runTest(name: string, root: string = '/src/pages/rest', suffix: string = '/test.md') {
+    ctx.pathInfo.suffix = suffix;
+    ctx.attributes.content.root = root;
+    ctx.attributes.content.path = root + suffix;
     ctx.attributes.content.md = await fs.readFile(path.resolve(__dirname, 'fixtures', `${name}.md`), 'utf-8');
     const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', `${name}.html`), 'utf-8');
     const html = md2markup(ctx);
@@ -51,7 +54,7 @@ describe('md2markup', () => {
   });
 
   it.only('should convert markdown to markup (partial)', async () => {
-    await runTest('partial');
+    await runTest('partial', undefined, '/b2b/company-users.md');
   });
 
   it.skip('should convert markdown to markup (page)', async () => {

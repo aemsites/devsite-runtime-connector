@@ -39,8 +39,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   if (!rootPath.startsWith('/')) {
     rootPath = `/${rootPath}`;
   }
-  const path = `${rootPath}${rest.join('/')}`.replaceAll('//', '/');
-  const mdUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main${path.startsWith('/') ? '' : '/'}${path}`;
+  let path = `${rootPath}${rest.join('/')}`.replaceAll('//', '/');
+  if (!path.startsWith('/')) {
+    path = `/${path}`;
+  }
+  ctx.attributes.content.root = rootPath;
+  ctx.attributes.content.path = path;
+  const mdUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main${path}`;
   log.debug('mdUrl: ', mdUrl);
 
   const res = await fetch(mdUrl);

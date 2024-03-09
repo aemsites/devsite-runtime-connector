@@ -31,6 +31,9 @@ export const DEFAULT_CONTEXT = (
   overrides: Record<string, unknown> = {},
 ): Helix.UniversalContext => {
   return {
+    pathInfo: {
+      suffix: '',
+    },
     attributes: {},
     ...overrides,
   } as unknown as Helix.UniversalContext;
@@ -65,5 +68,6 @@ export function minifyHtml(html: string, mainOnly = true): string {
     .replace(/\n/g, '')
     .replace(/>\s+</g, '><')
     .replace(/\s{2,}/g, ' ')
+    .replace(/\s+<\/p>/g, '</p>')
     .trim();
 }

@@ -31,20 +31,21 @@
   <header></header>
   <main>
     <div>
-      <h1 id="manage-company-users">Manage company users</h1>
+      <h1>Manage company users</h1>
       <p>A company user is a customer (buyer) that is assigned extended attributes that identify the company the user
         belongs to. Use the <code>POST /V1/customers</code> call, which is included with {{Vars.sitedatavarce}} and
         {{Vars.sitedatavaree}}, to create the user. After the user is created, you can use the
         <code>PUT /V1/customers/:customer_id</code> call to set their company data with the
-        <code>company_attributes</code> extended attributes.</p>
-      <div class="alert info">
+        <code>company_attributes</code> extended attributes.
+      </p>
+      <div class="inlinealert info">
         <div>
           <div>This topic discusses only the features of the <code>customerCustomerRepositoryV1</code> service that are
             specific to B2B. See <a href="/tutorials/orders/order-create-customer">Create a customer</a> for an example
             of creating a standard customer.</div>
         </div>
       </div>
-      <h2 id="managing-company-users-with-rest">Managing company users with REST</h2>
+      <h2>Managing company users with REST</h2>
       <p>This section describes the REST endpoints used to manage company users.</p>
       <p><strong>Service Name:</strong></p>
       <p><code>customerCustomerRepositoryV1</code></p>
@@ -92,16 +93,17 @@ PUT /V1/customers/:customerId
           <div>Required to create a company user.</div>
         </div>
       </div>
-      <h3 id="create-a-company-user">Create a company user</h3>
+      <h3>Create a company user</h3>
       <p>The <code>POST /V1/customers</code> call creates an Adobe Commerce customer. B2B extends the
-        <code>customerAccountManagementV1</code> service so that you can create a company user.</p>
+        <code>customerAccountManagementV1</code> service so that you can create a company user.
+      </p>
       <p><strong>Sample Usage:</strong></p>
       <p><code>POST &#x3C;host>/rest/&#x3C;store_code>/V1/customers</code></p>
       <p>First, create the standard customer. Their <code>company_id</code> will initially be set to <code>0</code>.</p>
-      <div class="code-block tabs">
+      <div class="codeblock tabs">
         <div>
           <div>
-            <h4 id="payload">Payload</h4>
+            <h4>Payload</h4>
           </div>
         </div>
         <div>
@@ -118,7 +120,7 @@ PUT /V1/customers/:customerId
         </div>
         <div>
           <div>
-            <h4 id="response">Response</h4>
+            <h4>Response</h4>
           </div>
         </div>
         <div>
@@ -148,17 +150,18 @@ PUT /V1/customers/:customerId
         </div>
       </div>
       <p>If you create a user from the admin dashboard, you can also set their company data at the same time.</p>
-      <h3 id="modify-a-company-user">Modify a company user</h3>
+      <h3>Modify a company user</h3>
       <p>The following example assigns the user to a company, sets their status to inactive and also sets their
-        <code>job_title</code> and <code>telephone</code>.</p>
+        <code>job_title</code> and <code>telephone</code>.
+      </p>
       <p>If you change the <code>status</code> to inactive, the account is locked. If the company user has child users,
         the system re-assigns the child users to the parent of the deactivated user.</p>
       <p><strong>Sample Usage:</strong></p>
       <p><code>PUT &#x3C;host>/rest/&#x3C;store_code>/V1/customers/13</code></p>
-      <div class="code-block tabs">
+      <div class="codeblock tabs">
         <div>
           <div>
-            <h4 id="payload-1">Payload</h4>
+            <h4>Payload</h4>
           </div>
         </div>
         <div>
@@ -185,7 +188,7 @@ PUT /V1/customers/:customerId
         </div>
         <div>
           <div>
-            <h4 id="response-1">Response</h4>
+            <h4>Response</h4>
           </div>
         </div>
         <div>
@@ -218,7 +221,7 @@ PUT /V1/customers/:customerId
           </div>
         </div>
       </div>
-      <h3 id="delete-a-company-user">Delete a company user</h3>
+      <h3>Delete a company user</h3>
       <p>If the specified company user has child users, the system re-assigns the child users to the parent of the
         deleted user. The user account is deleted from Commerce with all of its content, except quotes and orders. The
         user's orders and quotes remain visible to the seller.</p>
@@ -226,10 +229,10 @@ PUT /V1/customers/:customerId
         changes on such quotes.</p>
       <p><strong>Sample Usage:</strong></p>
       <p><code>DELETE &#x3C;host>/rest/&#x3C;store_code>/V1/customers/13</code></p>
-      <div class="code-block tabs">
+      <div class="codeblock tabs">
         <div>
           <div>
-            <h4 id="payload-2">Payload</h4>
+            <h4>Payload</h4>
           </div>
         </div>
         <div>
@@ -240,7 +243,7 @@ PUT /V1/customers/:customerId
         </div>
         <div>
           <div>
-            <h4 id="response-2">Response</h4>
+            <h4>Response</h4>
           </div>
         </div>
         <div>

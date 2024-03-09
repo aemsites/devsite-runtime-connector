@@ -18,6 +18,8 @@ export interface Content {
   mdast?: MDastRoot;
   hast?: HastNodes;
   html?: string;
+  root?: string;
+  path?: string;
 }
 
 declare module 'mdast' {
