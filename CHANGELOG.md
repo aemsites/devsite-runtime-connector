@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/aemsites/devsite-runtime-connector/compare/v1.0.3...v1.0.4) (2024-03-09)
+
+
+### Bug Fixes
+
+* add runtime function path prefix to image srcs, temp ([b06cd49](https://github.com/aemsites/devsite-runtime-connector/commit/b06cd49eee5c2facd09582863c48c5fb83124580))
+
 ## [1.0.3](https://github.com/aemsites/devsite-runtime-connector/compare/v1.0.2...v1.0.3) (2024-03-09)
 
 
