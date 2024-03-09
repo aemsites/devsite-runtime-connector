@@ -34,9 +34,9 @@ permissions:
         with:
           node-version: '20.x'
       - run: npm ci
-      # - name: Semantic Release
-      #   run: npx semantic-release
-      #   env:
-      #     AIO_RUNTIME_AUTH: ${{ secrets.AIO_RUNTIME_AUTH }}
-      #     AIO_RUNTIME_NAMESPACE: ${{ secrets.AIO_RUNTIME_NAMESPACE }}
+      - name: Semantic Release
+        run: npx semantic-release
+        env:
+          AIO_RUNTIME_AUTH: ${{ secrets.AIO_RUNTIME_AUTH }}
+          AIO_RUNTIME_NAMESPACE: ${{ secrets.AIO_RUNTIME_NAMESPACE }}
           
