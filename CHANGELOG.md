@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/aemsites/devsite-runtime-connector/compare/v1.0.2...v1.0.3) (2024-03-09)
+
+
+### Bug Fixes
+
+* handle images ([56f179b](https://github.com/aemsites/devsite-runtime-connector/commit/56f179bb6cb4744ff6ac331e01eb9166117ffc42))
+
 ## [1.0.2](https://github.com/aemsites/devsite-runtime-connector/compare/v1.0.1...v1.0.2) (2024-03-09)
 
 
