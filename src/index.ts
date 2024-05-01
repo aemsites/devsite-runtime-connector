@@ -47,7 +47,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
-  const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main${path}`;
+  const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}${path}`;
   log.debug('gitUrl: ', gitUrl);
 
   const res = await fetch(gitUrl);
@@ -73,6 +73,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   ctx.attributes.content.md = await res.text();
   const html = md2markup(ctx);
+  log.debug('html: ', html);
   return new Response(html, {
     status: 200,
     headers: {
