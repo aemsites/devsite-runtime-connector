@@ -45,10 +45,17 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   if (!path.startsWith('/')) {
     path = `/${path}`;
   }
+
+  const branch = path.split('/')[1];
+  const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/gatsby-config.js`;
+
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
+  ctx.attributes.content.gatsbyConfig = gatsbyConfigUrl;
+
   const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}${path}`;
   log.debug('gitUrl: ', gitUrl);
+  log.debug('gatsbyConfigUrl: ', gatsbyConfigUrl);
 
   const res = await fetch(gitUrl);
   if (!res.ok) {
@@ -61,6 +68,18 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     });
   }
 
+  const gatsbyRes = await fetch(gatsbyConfigUrl);
+  if (!gatsbyRes.ok) {
+    const status = gatsbyRes.status < 500 ? gatsbyRes.status : 500;
+    return new Response('', {
+      status,
+      headers: {
+        'x-error': `failed to fetch from github (${gatsbyRes.status})`,
+      },
+    });
+  }
+
+  log.debug('file name: ', ctx.attributes);
   if (!path.endsWith('.md')) {
     // dont convert non-markdown content
     return new Response(await res.arrayBuffer(), {
@@ -72,8 +91,12 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
 
   ctx.attributes.content.md = await res.text();
+  ctx.attributes.content.gatsbyConfigJSon = await gatsbyRes.text();
+
+  log.debug('gatsby json: ', ctx.attributes.content.gatsbyConfigJSon);
   const html = md2markup(ctx);
   log.debug('html: ', html);
+
   return new Response(html, {
     status: 200,
     headers: {

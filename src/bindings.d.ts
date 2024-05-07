@@ -22,6 +22,8 @@ export interface Content {
   path?: string;
   owner?: string;
   repo?: string;
+  gatsbyConfig?: string;
+  gatsbyConfigJSon?: string;
 }
 
 declare module 'mdast' {
