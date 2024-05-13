@@ -37,6 +37,8 @@ function getAttributeValue(attr: MdxJsxAttribute | MdxJsxExpressionAttribute, fa
 export default function mdxToBlocks(ctx: Helix.UniversalContext) {
   const { content: { mdast } } = ctx.attributes;
 
+  console.log('mdast:');
+  console.dir(mdast, { depth: null, colors: true, maxArrayLength: null });
   // for loop since we mutate in the loop
   for (let i = 0; i < mdast.children.length; i += 1) {
     const node = mdast.children[i];
@@ -48,6 +50,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
     const slotsValue = getAttributeValue(slotsAttr, '');
+
     if (!slotsValue) {
       // TODO: throw error for invalid document
       break;
@@ -64,38 +67,46 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     // block name is the JSX nodename
     const blockName = node.name;
+    console.log('block name', blockName);
+    console.log('variants', variants);
+    console.log('------------------------------------------------------');
 
-    const totalRows = repeat * slots.length;
-    const slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
-    if (slotsToInsert.length !== totalRows) {
-      // TODO: throw error for invalid slots?
+    if (node.name === 'table') {
+      const totalRows = repeat * slots.length;
+      const slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
+      if (slotsToInsert.length !== totalRows) {
+        // TODO: throw error for invalid slots?
+      }
+      mdast.children.splice(i, 1 + slotsToInsert.length, {
+        type: 'gridTable',
+        children: [{
+          type: 'gtBody',
+          children: [
+            // first is the header, containing block name
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'strong',
+                  children: [
+                    {
+                      type: 'text',
+                      value: `${blockName} (${variants})`,
+                    },
+                  ],
+                },
+              ],
+            },
+            // remaining is the content from the slots
+            // each slot is inserted as a separate row
+            ...slotsToInsert,
+          ].map(makeGridTableRow),
+        }],
+      } as unknown as RootContent);
+    } else {
+      console.log('-------------------------------------');
+      console.log('Me not table!');
+      console.log('-------------------------------------');
     }
-
-    mdast.children.splice(i, 1 + slotsToInsert.length, {
-      type: 'gridTable',
-      children: [{
-        type: 'gtBody',
-        children: [
-          // first is the header, containing block name
-          {
-            type: 'paragraph',
-            children: [
-              {
-                type: 'strong',
-                children: [
-                  {
-                    type: 'text',
-                    value: `${blockName} (${variants})`,
-                  },
-                ],
-              },
-            ],
-          },
-          // remaining is the content from the slots
-          // each slot is inserted as a separate row
-          ...slotsToInsert,
-        ].map(makeGridTableRow),
-      }],
-    } as unknown as RootContent);
   }
 }
