@@ -100,6 +100,13 @@ export default function createPageBlocks(ctx) {
   /** @type {import('../bindings').Content['hast']} */
   const phast = hast;
   visit(phast, (node, idx, parent) => {
+    // console.log('******************************************************************');
+    // console.log('node:');
+    // console.dir(node, { depth: null, colors: true, maxArrayLength: null });
+    if (node.tagName === 'table' && parent.tagName === 'div') {
+      parent.children[idx] = tableToDivs(node);
+      return SKIP;
+    }
     if (node.tagName === 'table' && parent.tagName === 'div') {
       parent.children[idx] = tableToDivs(node);
       return SKIP;
