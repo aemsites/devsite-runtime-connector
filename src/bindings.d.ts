@@ -22,8 +22,10 @@ export interface Content {
   path?: string;
   owner?: string;
   repo?: string;
-  gatsbyConfig?: string;
-  gatsbyConfigJSon?: string;
+  topNavUrl?: string;
+  sideNavUrl?: string;
+  topNavContent?: string;
+  sideNavContent?: string;
 }
 
 declare module 'mdast' {

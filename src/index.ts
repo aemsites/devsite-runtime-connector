@@ -46,16 +46,17 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     path = `/${path}`;
   }
 
-  const branch = path.split('/')[1];
-  const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/gatsby-config.js`;
+  // const branch = path.split('/')[1];
+  // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;
+  const topNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/topNav.html`;
+  const sideNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/sideNav.html`;
 
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
-  ctx.attributes.content.gatsbyConfig = gatsbyConfigUrl;
+  ctx.attributes.content.topNavUrl = topNavUrl;
+  ctx.attributes.content.sideNavUrl = sideNavUrl;
 
   const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}${path}`;
-  log.debug('gitUrl: ', gitUrl);
-  log.debug('gatsbyConfigUrl: ', gatsbyConfigUrl);
 
   const res = await fetch(gitUrl);
   if (!res.ok) {
@@ -68,13 +69,24 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     });
   }
 
-  const gatsbyRes = await fetch(gatsbyConfigUrl);
-  if (!gatsbyRes.ok) {
-    const status = gatsbyRes.status < 500 ? gatsbyRes.status : 500;
+  const topNavRes = await fetch(topNavUrl);
+  if (!topNavRes.ok) {
+    const status = topNavRes.status < 500 ? topNavRes.status : 500;
     return new Response('', {
       status,
       headers: {
-        'x-error': `failed to fetch from github (${gatsbyRes.status})`,
+        'x-error': `failed to fetch from github (${topNavRes.status})`,
+      },
+    });
+  }
+
+  const sideNavRes = await fetch(sideNavUrl);
+  if (!sideNavRes.ok) {
+    const status = sideNavRes.status < 500 ? sideNavRes.status : 500;
+    return new Response('', {
+      status,
+      headers: {
+        'x-error': `failed to fetch from github (${sideNavRes.status})`,
       },
     });
   }
@@ -91,9 +103,11 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
 
   ctx.attributes.content.md = await res.text();
-  ctx.attributes.content.gatsbyConfigJSon = await gatsbyRes.text();
+  ctx.attributes.content.topNavContent = await topNavRes.text();
+  ctx.attributes.content.sideNavContent = await sideNavRes.text();
 
-  log.debug('gatsby json: ', ctx.attributes.content.gatsbyConfigJSon);
+  log.debug('topNavContent: ', ctx.attributes.content.topNavContent);
+  log.debug('sideNavContent: ', ctx.attributes.content.sideNavContent);
   const html = md2markup(ctx);
   log.debug('html: ', html);
 
