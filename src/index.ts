@@ -48,13 +48,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   // const branch = path.split('/')[1];
   // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;
-  const topNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/topNav.html`;
-  const sideNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/sideNav.html`;
+  // const topNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/topNav.html`;
+  // const sideNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/sideNav.html`;
 
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
-  ctx.attributes.content.topNavUrl = topNavUrl;
-  ctx.attributes.content.sideNavUrl = sideNavUrl;
+  // ctx.attributes.content.topNavUrl = topNavUrl;
+  // ctx.attributes.content.sideNavUrl = sideNavUrl;
 
   const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}${path}`;
 
@@ -69,27 +69,27 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     });
   }
 
-  const topNavRes = await fetch(topNavUrl);
-  if (!topNavRes.ok) {
-    const status = topNavRes.status < 500 ? topNavRes.status : 500;
-    return new Response('', {
-      status,
-      headers: {
-        'x-error': `failed to fetch from github (${topNavRes.status})`,
-      },
-    });
-  }
+  // const topNavRes = await fetch(topNavUrl);
+  // if (!topNavRes.ok) {
+  //   const status = topNavRes.status < 500 ? topNavRes.status : 500;
+  //   return new Response('', {
+  //     status,
+  //     headers: {
+  //       'x-error': `failed to fetch from github (${topNavRes.status})`,
+  //     },
+  //   });
+  // }
 
-  const sideNavRes = await fetch(sideNavUrl);
-  if (!sideNavRes.ok) {
-    const status = sideNavRes.status < 500 ? sideNavRes.status : 500;
-    return new Response('', {
-      status,
-      headers: {
-        'x-error': `failed to fetch from github (${sideNavRes.status})`,
-      },
-    });
-  }
+  // const sideNavRes = await fetch(sideNavUrl);
+  // if (!sideNavRes.ok) {
+  //   const status = sideNavRes.status < 500 ? sideNavRes.status : 500;
+  //   return new Response('', {
+  //     status,
+  //     headers: {
+  //       'x-error': `failed to fetch from github (${sideNavRes.status})`,
+  //     },
+  //   });
+  // }
 
   log.debug('file name: ', ctx.attributes);
   if (!path.endsWith('.md')) {
@@ -103,13 +103,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
 
   ctx.attributes.content.md = await res.text();
-  ctx.attributes.content.topNavContent = await topNavRes.text();
-  ctx.attributes.content.sideNavContent = await sideNavRes.text();
+  // ctx.attributes.content.topNavContent = await topNavRes.text();
+  // ctx.attributes.content.sideNavContent = await sideNavRes.text();
 
-  log.debug('topNavContent: ', ctx.attributes.content.topNavContent);
-  log.debug('sideNavContent: ', ctx.attributes.content.sideNavContent);
+  // log.debug('topNavContent: ', ctx.attributes.content.topNavContent);
+  // log.debug('sideNavContent: ', ctx.attributes.content.sideNavContent);
   const html = md2markup(ctx);
-  log.debug('html: ', html);
+  // log.debug('html: ', html);
 
   return new Response(html, {
     status: 200,

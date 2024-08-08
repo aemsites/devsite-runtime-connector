@@ -22,10 +22,6 @@ export interface Content {
   path?: string;
   owner?: string;
   repo?: string;
-  topNavUrl?: string;
-  sideNavUrl?: string;
-  topNavContent?: string;
-  sideNavContent?: string;
 }
 
 declare module 'mdast' {
