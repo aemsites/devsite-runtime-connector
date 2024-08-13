@@ -16,7 +16,7 @@ import { Request, Response } from '@adobe/fetch';
 // eslint-disable-next-line
 import { createAdapter } from '../node_modules/@adobe/helix-universal/src/openwhisk-adapter.js';
 import md2markup from './md2markup.js';
-import * as devsitePaths from './devsite-paths.json' assert { type: 'json' };
+import devsitePaths from './devsite-paths.json' assert { type: 'json' };
 
 // test urls
 // http://localhost:3000/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=main/src/pages
