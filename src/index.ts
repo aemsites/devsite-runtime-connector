@@ -16,6 +16,7 @@ import { Request, Response } from '@adobe/fetch';
 // eslint-disable-next-line
 import { createAdapter } from '../node_modules/@adobe/helix-universal/src/openwhisk-adapter.js';
 import md2markup from './md2markup.js';
+import * as devsitePaths from './devsite-paths.json' assert { type: 'json' };
 
 // test urls
 // http://localhost:3000/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=main/src/pages
@@ -26,25 +27,24 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   const { log } = ctx;
   ctx.attributes ??= {};
   ctx.attributes.content ??= {};
-  const [_, owner, repo, ...rest] = ctx.pathInfo.suffix.split('/');
-  if (!owner || !repo) {
-    return new Response('', { status: 400, headers: { 'x-error': 'owner and repo are required' } });
+  console.log('ctx.pathInfo', ctx.pathInfo);
+
+  const [_, repo, ...rest] = ctx.pathInfo.suffix.split('/');
+  if (!repo) {
+    return new Response('', { status: 400, headers: { 'x-error': 'repo is required' } });
   }
+
+  const owner = devsitePaths[repo]?.owner;
   ctx.attributes.content.owner = owner;
   ctx.attributes.content.repo = repo;
 
-  const url = new URL(req.url);
-  let rootPath = url.searchParams.has('root') ? url.searchParams.get('root') : '/';
-  if (!rootPath.endsWith('/')) {
-    rootPath += '/';
-  }
-  if (!rootPath.startsWith('/')) {
-    rootPath = `/${rootPath}`;
-  }
+  console.log(`owner: ${owner}`);
+  console.log(`repo: ${repo}`);
+
+  // const url = new URL(req.url);
+
+  let rootPath = devsitePaths[repo]?.root;
   let path = `${rootPath}${rest.join('/')}`.replaceAll('//', '/');
-  if (!path.startsWith('/')) {
-    path = `/${path}`;
-  }
 
   // const branch = path.split('/')[1];
   // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;
@@ -56,8 +56,10 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // ctx.attributes.content.topNavUrl = topNavUrl;
   // ctx.attributes.content.sideNavUrl = sideNavUrl;
 
-  const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}${path}`;
-
+  // TODO: need to determine which branch we want to pull from based on url
+  // default to main
+  const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main${path}`;
+  console.log(`gitUrl: ${gitUrl}`);
   const res = await fetch(gitUrl);
   if (!res.ok) {
     const status = res.status < 500 ? res.status : 500;

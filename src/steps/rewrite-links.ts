@@ -15,6 +15,7 @@ import path from 'path';
 import type { Helix } from '@adobe/helix-universal';
 
 function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | 'a') {
+  const { log } = ctx;
   if (!pathOrUrl.startsWith('./') && !pathOrUrl.startsWith('../') && !pathOrUrl.startsWith('/')) {
     return pathOrUrl;
   }
@@ -26,6 +27,8 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
     repo,
   } = ctx.attributes.content;
 
+  log.debug('rewrite')
+  log.debug(ctx.attributes);
   const cwd = docPath.split('/').slice(0, -1).join('/');
 
   let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
@@ -33,11 +36,11 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
     resolved = resolved.slice(0, -3);
   } else if (type === 'img') {
     // use absolute paths for images, since they will be replaced with mediabus paths once ingested
+    // TODO: fix resolved paths for images
     if (!resolved.startsWith('/')) {
       resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
     }
-    // TODO: parameterize the runtime prefix, not sure where it's set in helix-universal
-    resolved = `/api/v1/web/md2markup/main/${owner}/${repo}${resolved}`;
+    //resolved = `${resolved}`;
   }
 
   resolved = resolved.startsWith(root) ? resolved.substring(root.length) : resolved;

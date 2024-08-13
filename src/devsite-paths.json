@@ -1,0 +1,12 @@
+{
+    "commerce-webapi" : {
+        "repo": "commerce-webapi", 
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
+    },
+    "document-services" : {
+        "repo": "document-services", 
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
+    }
+}

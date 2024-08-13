@@ -24,6 +24,7 @@ module.exports = {
     'linebreak-style': ['error', 'unix'],
     'import/extensions': ['error', {
       js: 'always',
+      json: 'never',
     }],
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
   },
@@ -66,6 +67,7 @@ module.exports = {
         'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
         'import/extensions': ['error', {
           js: 'always',
+                json: 'never',
         }],
       },
       settings: {
