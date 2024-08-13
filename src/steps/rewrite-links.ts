@@ -28,7 +28,6 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
   } = ctx.attributes.content;
 
   log.debug('rewrite')
-  log.debug(ctx.attributes);
   const cwd = docPath.split('/').slice(0, -1).join('/');
 
   let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
@@ -37,17 +36,20 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
   } else if (type === 'img') {
     // use absolute paths for images, since they will be replaced with mediabus paths once ingested
     // TODO: fix resolved paths for images
+    log.debug(`resolved start: ${resolved}`);
     if (!resolved.startsWith('/')) {
       resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
     }
-    //resolved = `${resolved}`;
+    resolved = `${resolved}`;
   }
 
   resolved = resolved.startsWith(root) ? resolved.substring(root.length) : resolved;
+  log.debug(`resolved final: ${resolved}`);
   return resolved;
 }
 
 export default function rewriteLinks(ctx: Helix.UniversalContext) {
+  const { log } = ctx;
   const { attributes: { content: { hast } } } = ctx;
 
   const els = {
@@ -62,7 +64,10 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
     const attr = els[node.tagName];
     if (attr) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      log.debug('visit');
       node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
+      log.debug(`${attr} visited`);
+
     }
     return CONTINUE;
   });

@@ -51,8 +51,11 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // const topNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/topNav.html`;
   // const sideNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/sideNav.html`;
 
+  console.log(`path: ${path}`);
+  console.log(`ctx.attributes.content.path: ${ctx.attributes.content.path}`);
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
+
   // ctx.attributes.content.topNavUrl = topNavUrl;
   // ctx.attributes.content.sideNavUrl = sideNavUrl;
 
