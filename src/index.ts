@@ -29,39 +29,73 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   ctx.attributes.content ??= {};
   console.log('ctx.pathInfo', ctx.pathInfo);
 
-  const [_, repo, ...rest] = ctx.pathInfo.suffix.split('/');
-  if (!repo) {
-    return new Response('', { status: 400, headers: { 'x-error': 'repo is required' } });
+
+  let suffixSplit = ctx.pathInfo.suffix.split('/');
+  let suffixSplitRest = suffixSplit.slice(1);
+  let devsitePathMatch;
+  let devsitePathMatchFlag = false;
+
+  // find match based on level 3, 2, or 1 transclusion rule
+  // if match found in higher level don't do lower level
+
+  if (suffixSplit.length > 2) {
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/' + suffixSplit[1] + '/' + suffixSplit[2] + '/' + suffixSplit[3]);
+    devsitePathMatchFlag = devsitePathMatch ? true : false;
+    if(devsitePathMatchFlag) {
+      console.log('rest 3')
+      suffixSplitRest = suffixSplit.slice(4);
+    }
+  }
+  if (suffixSplit.length > 1 && !devsitePathMatchFlag) {
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/' + suffixSplit[1] + '/' + suffixSplit[2]);
+    devsitePathMatchFlag = devsitePathMatch ? true : false;
+    if(devsitePathMatchFlag) {
+      console.log('rest 2')
+      suffixSplitRest = suffixSplit.slice(3);
+    }
+  }
+  if (suffixSplit.length > 0 && !devsitePathMatchFlag) {
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/' + suffixSplit[1]);
+    devsitePathMatchFlag = devsitePathMatch ? true : false;
+    if(devsitePathMatchFlag) {
+      console.log('rest 1')
+      suffixSplitRest = suffixSplit.slice(2);
+    }
   }
 
-  const owner = devsitePaths[repo]?.owner;
-  ctx.attributes.content.owner = owner;
-  ctx.attributes.content.repo = repo;
+  console.log(`devsitePathMatch: ${devsitePathMatch.pathPrefix}`);
+  console.log(`suffixSplitRest: ${suffixSplitRest}`);
+  if(devsitePathMatch) {
+    ctx.attributes.content.owner = devsitePathMatch.owner;
+    ctx.attributes.content.repo = devsitePathMatch.repo;
+  }
 
-  console.log(`owner: ${owner}`);
-  console.log(`repo: ${repo}`);
 
-  // const url = new URL(req.url);
+  // const [_, repo, ...rest] = ctx.pathInfo.suffix.split('/');
+  // if (!repo) {
+  //   return new Response('', { status: 400, headers: { 'x-error': 'repo is required' } });
+  // }
 
-  let rootPath = devsitePaths[repo]?.root;
-  let path = `${rootPath}${rest.join('/')}`.replaceAll('//', '/');
+  let rootPath = devsitePathMatch?.root;
+  let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
 
   // const branch = path.split('/')[1];
   // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;
   // const topNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/topNav.html`;
   // const sideNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/sideNav.html`;
 
-  console.log(`path: ${path}`);
-  console.log(`ctx.attributes.content.path: ${ctx.attributes.content.path}`);
+
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
 
+  console.log(`path: ${path}`);
+  console.log(`ctx.attributes.content.path: ${ctx.attributes.content.path}`);
   // ctx.attributes.content.topNavUrl = topNavUrl;
   // ctx.attributes.content.sideNavUrl = sideNavUrl;
 
   // TODO: need to determine which branch we want to pull from based on url
   // default to main
-  const gitUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main${path}`;
+  const gitUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/main${path}`;
   console.log(`gitUrl: ${gitUrl}`);
   const res = await fetch(gitUrl);
   if (!res.ok) {

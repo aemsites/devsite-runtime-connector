@@ -1,12 +1,20 @@
-{
-    "commerce-webapi" : {
-        "repo": "commerce-webapi", 
+[
+    {
+        "pathPrefix": "/commerce/webapi",
+        "repo": "commerce-webapi",
         "owner": "AdobeDocs",
         "root": "/src/pages/"
     },
-    "document-services" : {
-        "repo": "document-services", 
+    {
+        "pathPrefix": "/document-services",
+        "repo": "document-services",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
+    },
+    {
+        "pathPrefix": "/analytics-apis/docs/2.0",
+        "repo": "analytics-2.0-apis",
         "owner": "AdobeDocs",
         "root": "/src/pages/"
     }
-}
+]
