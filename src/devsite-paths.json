@@ -16,5 +16,11 @@
         "repo": "analytics-2.0-apis",
         "owner": "AdobeDocs",
         "root": "/src/pages/"
+    },
+    {
+        "pathPrefix": "/",
+        "repo": "adp-devsite",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
     }
 ]

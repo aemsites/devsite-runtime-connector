@@ -22,6 +22,15 @@ import devsitePaths from './devsite-paths.json' assert { type: 'json' };
 // http://localhost:3000/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=main/src/pages
 // https://53444-842orangechinchilla.adobeioruntime.net/api/v1/web/md2markup/main/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=/main/src/pages
 
+function getUrlExtension(url) {
+  // default to .md extension
+  let extension;
+  if(url.split('.').length > 1){
+    extension = url.split(/[#?]/)[0].split('.').pop().trim();
+  }
+  return extension;
+}
+
 // exported for dev server & tests
 export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Response> {
   const { log } = ctx;
@@ -29,15 +38,23 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   ctx.attributes.content ??= {};
   console.log('ctx.pathInfo', ctx.pathInfo);
 
+  let extension = getUrlExtension(ctx.pathInfo.suffix);
+
+  // always add on a trailing slash if no extension found
+  if(!extension) {
+    ctx.pathInfo.suffix += '/';
+  }
 
   let suffixSplit = ctx.pathInfo.suffix.split('/');
   let suffixSplitRest = suffixSplit.slice(1);
+
   let devsitePathMatch;
   let devsitePathMatchFlag = false;
 
+  console.log(`extension ${extension}`);
+
   // find match based on level 3, 2, or 1 transclusion rule
   // if match found in higher level don't do lower level
-
   if (suffixSplit.length > 2) {
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/' + suffixSplit[1] + '/' + suffixSplit[2] + '/' + suffixSplit[3]);
     devsitePathMatchFlag = devsitePathMatch ? true : false;
@@ -63,13 +80,18 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     }
   }
 
-  console.log(`devsitePathMatch: ${devsitePathMatch.pathPrefix}`);
+  // fix favicon to retrieve from adp-devsite repo
+  if(ctx.pathInfo.suffix === '/favicon.ico') {
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/');
+  }
+  
+  console.log(`devsitePathMatch: ${devsitePathMatch?.pathPrefix}`);
   console.log(`suffixSplitRest: ${suffixSplitRest}`);
   if(devsitePathMatch) {
     ctx.attributes.content.owner = devsitePathMatch.owner;
     ctx.attributes.content.repo = devsitePathMatch.repo;
   }
-
+  
 
   // const [_, repo, ...rest] = ctx.pathInfo.suffix.split('/');
   // if (!repo) {
@@ -78,6 +100,11 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   let rootPath = devsitePathMatch?.root;
   let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
+
+  // impliclty grab the index.md file if there's a trailing slash and no extension found
+  if(path.endsWith('/') && !extension) {
+    path += 'index.md';
+  }
 
   // const branch = path.split('/')[1];
   // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;
