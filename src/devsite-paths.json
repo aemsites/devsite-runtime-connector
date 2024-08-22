@@ -22,5 +22,11 @@
         "repo": "adp-devsite",
         "owner": "AdobeDocs",
         "root": "/src/pages/"
+    },
+    {
+        "pathPrefix": "/github-actions-test",
+        "repo": "adp-devsite-github-actions-test",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
     }
 ]
