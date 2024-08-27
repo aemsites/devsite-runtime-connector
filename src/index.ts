@@ -23,7 +23,6 @@ import devsitePaths from './devsite-paths.json' assert { type: 'json' };
 // https://53444-842orangechinchilla.adobeioruntime.net/api/v1/web/md2markup/main/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=/main/src/pages
 
 function getUrlExtension(url) {
-  // default to .md extension
   let extension;
   if(url.split('.').length > 1){
     extension = url.split(/[#?]/)[0].split('.').pop().trim();
@@ -40,10 +39,10 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   let extension = getUrlExtension(ctx.pathInfo.suffix);
 
-  // always add on a trailing slash if no extension found
-  if(!extension) {
-    ctx.pathInfo.suffix += '/';
-  }
+  // TODO - figure out logic for tacking on md files always add on a trailing slash if no extension found
+  // if(!extension) {
+  //   ctx.pathInfo.suffix += '/';
+  // }
 
   let suffixSplit = ctx.pathInfo.suffix.split('/');
   let suffixSplitRest = suffixSplit.slice(1);
@@ -101,9 +100,15 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let rootPath = devsitePathMatch?.root;
   let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
 
-  // impliclty grab the index.md file if there's a trailing slash and no extension found
-  if(path.endsWith('/') && !extension) {
+
+  if(path.endsWith('/')) {
+    // impliclty grab index.md if it's a folder level
     path += 'index.md';
+    extension = '.md';
+  }
+  // impliclty grab .md if there's no extension
+  if(!extension) {
+    path += '.md';
   }
 
   // const branch = path.split('/')[1];
