@@ -15,15 +15,16 @@ import { toHtml } from 'hast-util-to-html';
 import rehypeFormat from 'rehype-format';
 
 function wrapHtml(content: string, isDocumentationMode: boolean): string {
-  let documentationString = `class="documentation"`;
+  let documentationString = `<meta name="template" content="documentation">`;
   return `\
 <!DOCTYPE html>
 <html>
   <head>
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    ${isDocumentationMode ? documentationString : ''}
   </head>
-  <body ${isDocumentationMode ? documentationString : ''}>
+  <body>
     <header></header>
     <main>
 ${content
