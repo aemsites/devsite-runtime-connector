@@ -22,6 +22,7 @@ function wrapHtml(content: string, isDocumentationMode: boolean): string {
   <head>
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="source" content="github">
     ${isDocumentationMode ? documentationString : ''}
   </head>
   <body>
