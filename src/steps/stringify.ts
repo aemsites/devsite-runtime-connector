@@ -14,7 +14,8 @@ import { Helix } from '@adobe/helix-universal';
 import { toHtml } from 'hast-util-to-html';
 import rehypeFormat from 'rehype-format';
 
-function wrapHtml(content: string): string {
+function wrapHtml(content: string, isDocumentationMode: boolean): string {
+  let documentationString = `class="documentation"`;
   return `\
 <!DOCTYPE html>
 <html>
@@ -22,7 +23,7 @@ function wrapHtml(content: string): string {
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
-  <body>
+  <body ${isDocumentationMode ? documentationString : ''}>
     <header></header>
     <main>
 ${content
@@ -40,7 +41,11 @@ export default function stringify(ctx: Helix.UniversalContext) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
   rehypeFormat()(content.hast as any);
 
+  // TODO : think about setting this in an intuitive way rather than
+  // set to documetation mode unless its the root index file in the docs
+  // which currently matches what gatsby does
+  let documetationMode = ctx.attributes.content.path === '/src/pages/index.md' ? false : true;
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  }));
+  }), documetationMode);
 }

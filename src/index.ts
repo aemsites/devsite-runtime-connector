@@ -180,7 +180,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // log.debug('topNavContent: ', ctx.attributes.content.topNavContent);
   // log.debug('sideNavContent: ', ctx.attributes.content.sideNavContent);
   const html = md2markup(ctx);
-  // log.debug('html: ', html);
+  log.debug('html: ', html);
 
   return new Response(html, {
     status: 200,
