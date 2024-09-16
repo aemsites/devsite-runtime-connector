@@ -89,7 +89,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   if(devsitePathMatch) {
     ctx.attributes.content.owner = devsitePathMatch.owner;
     ctx.attributes.content.repo = devsitePathMatch.repo;
-    ctx.attributes.content.pathPrefix = devsitePathMatch.pathPrefix;
+    ctx.attributes.content.pathprefix = devsitePathMatch.pathPrefix;
   }
   
 

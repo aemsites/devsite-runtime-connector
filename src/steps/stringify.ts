@@ -14,7 +14,7 @@ import { Helix } from '@adobe/helix-universal';
 import { toHtml } from 'hast-util-to-html';
 import rehypeFormat from 'rehype-format';
 
-function wrapHtml(content: string, pathPrefix: string, isDocumentationMode: boolean): string {
+function wrapHtml(content: string, pathprefix: string, isDocumentationMode: boolean): string {
   let documentationString = `<meta name="template" content="documentation">`;
   return `\
 <!DOCTYPE html>
@@ -23,7 +23,7 @@ function wrapHtml(content: string, pathPrefix: string, isDocumentationMode: bool
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="source" content="github">
-    <meta name="pathPrefix" content="${pathPrefix}">
+    <meta name="pathprefix" content="${pathprefix}">
     ${isDocumentationMode ? documentationString : ''}
   </head>
   <body>
@@ -48,9 +48,9 @@ export default function stringify(ctx: Helix.UniversalContext) {
   // set to documetation mode unless its the root index file in the docs
   // which currently matches what gatsby does
   let documetationMode = ctx.attributes.content.path === '/src/pages/index.md' ? false : true;
-  let pathPrefix = ctx.attributes.content.pathPrefix;
+  let pathprefix = ctx.attributes.content.pathprefix;
 
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  }), pathPrefix, documetationMode);
+  }), pathprefix, documetationMode);
 }
