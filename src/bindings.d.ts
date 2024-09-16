@@ -23,6 +23,7 @@ export interface Content {
   owner?: string;
   repo?: string;
   rest?: string;
+  pathPrefix?: string;
 }
 
 declare module 'mdast' {
