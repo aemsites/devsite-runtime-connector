@@ -28,5 +28,12 @@
         "repo": "adp-devsite-github-actions-test",
         "owner": "AdobeDocs",
         "root": "/src/pages/"
+    },
+    {
+        "pathPrefix": "/developer-console/docs",
+        "repo": "adobe-dev-console",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/",
+        "branch": "eds-migration"
     }
 ]

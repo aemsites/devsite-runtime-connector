@@ -22,6 +22,7 @@ export interface Content {
   path?: string;
   owner?: string;
   repo?: string;
+  branch?: string;
   rest?: string;
   pathprefix?: string;
 }

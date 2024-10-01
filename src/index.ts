@@ -86,10 +86,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   
   console.log(`devsitePathMatch: ${devsitePathMatch?.pathPrefix}`);
   console.log(`suffixSplitRest: ${suffixSplitRest}`);
+
+  // TODO: should this error out if no match is present?
   if(devsitePathMatch) {
     ctx.attributes.content.owner = devsitePathMatch.owner;
     ctx.attributes.content.repo = devsitePathMatch.repo;
     ctx.attributes.content.pathprefix = devsitePathMatch.pathPrefix;
+    ctx.attributes.content.branch ? ctx.attributes.content.branch : 'main';
   }
   
 
@@ -128,7 +131,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   // TODO: need to determine which branch we want to pull from based on url
   // default to main
-  const gitUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/main${path}`;
+  const gitUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${branch}${path}`;
   console.log(`gitUrl: ${gitUrl}`);
   const res = await fetch(gitUrl);
   if (!res.ok) {
