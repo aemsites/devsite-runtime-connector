@@ -25,6 +25,7 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
     path: docPath,
     owner,
     repo,
+    branch
   } = ctx.attributes.content;
 
   log.debug('rewrite')
@@ -34,12 +35,15 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
   if (resolved.endsWith('.md')) {
     resolved = resolved.slice(0, -3);
   } else if (type === 'img') {
+    const imageURL = resolved.split('D:')[1].replaceAll('\\', '/');
+    const fetchImage = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${imageURL}`;
+    resolved = fetchImage;
     // use absolute paths for images, since they will be replaced with mediabus paths once ingested
     // TODO: fix resolved paths for images
     log.debug(`resolved start: ${resolved}`);
-    if (!resolved.startsWith('/')) {
-      resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
-    }
+    // if (!resolved.startsWith('/')) {
+    //   resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
+    // }
     resolved = `${resolved}`;
   }
 

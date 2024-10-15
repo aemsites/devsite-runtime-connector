@@ -106,16 +106,45 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let rootPath = devsitePathMatch?.root;
   let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
 
+  const getConfig = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}/gatsby-config.js`;
 
-  if(path.endsWith('/')) {
-    // impliclty grab index.md if it's a folder level
-    path += 'index.md';
-    extension = '.md';
+  const configResponse = await fetch(getConfig);
+  const configData = await configResponse.text();
+  const regex = /module\.exports\s*=\s*({[^]*?});/;
+  const match = configData.match(regex);
+
+  const paths = [];
+  let fileName;
+
+  if (match) {
+    const exportsValue = match[1];
+    const config = eval('(' + exportsValue + ')');
+    const siteMetadata = config.siteMetadata;
+
+    const extractPaths = (pages) => {
+      if (!pages) return;
+      pages.forEach((page) => {
+        if (page.path) paths.push(page.path);
+        extractPaths(page.pages);
+      });
+    };
+
+    extractPaths([...siteMetadata.pages, ...siteMetadata.subPages]);
+
+    fileName = path.split("/src/pages/")[1]?.replace(/\/$/, ''); // Remove trailing slash if exists
+    const checkIndex = path.split('/').pop();
+
+    if (checkIndex !== "index.md") {
+      if (path.endsWith('/')) {
+        path = paths.includes(`${fileName}.md`) ? `${path.slice(0, -1)}.md` : `${path}index.md`;
+      } 
+      else {
+        path = paths.includes(`${fileName}.md`) ? `${path}.md` : `${path}/index.md`;
+      }
+    }
   }
+
   // impliclty grab .md if there's no extension
-  if(!extension) {
-    path += '.md';
-  }
 
   // const branch = path.split('/')[1];
   // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;
