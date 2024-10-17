@@ -14,7 +14,7 @@ import { Helix } from '@adobe/helix-universal';
 import { toHtml } from 'hast-util-to-html';
 import rehypeFormat from 'rehype-format';
 
-function wrapHtml(content: string, pathprefix: string, isDocumentationMode: boolean): string {
+function wrapHtml(content: string, pathprefix: string, githubBlobPath: string, isDocumentationMode: boolean): string {
   let documentationString = `<meta name="template" content="documentation">`;
   return `\
 <!DOCTYPE html>
@@ -24,6 +24,7 @@ function wrapHtml(content: string, pathprefix: string, isDocumentationMode: bool
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="source" content="github">
     <meta name="pathprefix" content="${pathprefix}">
+    <meta name="githubBlobPath" content="${githubBlobPath}">
     ${isDocumentationMode ? documentationString : ''}
   </head>
   <body>
@@ -49,8 +50,8 @@ export default function stringify(ctx: Helix.UniversalContext) {
   // which currently matches what gatsby does
   let documetationMode = ctx.attributes.content.path === '/src/pages/index.md' ? false : true;
   let pathprefix = ctx.attributes.content.pathprefix;
-
+  let githubBlobPath = `https://github.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/blob/${ctx.attributes.content.branch}${ctx.attributes.content.path}`;
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  }), pathprefix, documetationMode);
+  }), pathprefix, githubBlobPath, documetationMode);
 }
