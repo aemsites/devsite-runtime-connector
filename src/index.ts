@@ -106,41 +106,31 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let rootPath = devsitePathMatch?.root;
   let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
 
-  const getConfig = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}/gatsby-config.js`;
-
-  const configResponse = await fetch(getConfig);
-  const configData = await configResponse.text();
-  const regex = /module\.exports\s*=\s*({[^]*?});/;
-  const match = configData.match(regex);
+  const configMDFile = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}/src/pages/config.md`;
+  const configMDFileResponse = await fetch(configMDFile);
+  const configMDFileData = await configMDFileResponse.text();
 
   const paths = [];
+
+  // Regular expression to find paths
+  const regex = /\((.*?)\)/g;
+  let match;
+
+  while ((match = regex.exec(configMDFileData)) !== null) {
+    paths.push(match[1]); // Push the matched path into the array
+  }
+
   let fileName;
 
-  if (match) {
-    const exportsValue = match[1];
-    const config = eval('(' + exportsValue + ')');
-    const siteMetadata = config.siteMetadata;
+  fileName = path.split("/src/pages/")[1]?.replace(/\/$/, ''); // Remove trailing slash if exists
+  const checkIndex = path.split('/').pop();
 
-    const extractPaths = (pages) => {
-      if (!pages) return;
-      pages.forEach((page) => {
-        if (page.path) paths.push(page.path);
-        extractPaths(page.pages);
-      });
-    };
-
-    extractPaths([...siteMetadata.pages, ...siteMetadata.subPages]);
-
-    fileName = path.split("/src/pages/")[1]?.replace(/\/$/, ''); // Remove trailing slash if exists
-    const checkIndex = path.split('/').pop();
-
-    if (checkIndex !== "index.md") {
-      if (path.endsWith('/')) {
-        path = paths.includes(`${fileName}.md`) ? `${path.slice(0, -1)}.md` : `${path}index.md`;
-      } 
-      else {
-        path = paths.includes(`${fileName}.md`) ? `${path}.md` : `${path}/index.md`;
-      }
+  if (checkIndex !== "index.md") {
+    if (path.endsWith('/')) {
+      path = paths.includes(`${fileName}.md`) ? `${path.slice(0, -1)}.md` : `${path}index.md`;
+    }
+    else {
+      path = paths.includes(`${fileName}.md`) ? `${path}.md` : `${path}/index.md`;
     }
   }
 
