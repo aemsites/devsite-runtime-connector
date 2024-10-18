@@ -106,16 +106,35 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let rootPath = devsitePathMatch?.root;
   let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
 
+  const configMDFile = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}/src/pages/config.md`;
+  const configMDFileResponse = await fetch(configMDFile);
+  const configMDFileData = await configMDFileResponse.text();
 
-  if(path.endsWith('/')) {
-    // impliclty grab index.md if it's a folder level
-    path += 'index.md';
-    extension = '.md';
+  const paths = [];
+
+  // Regular expression to find paths
+  const regex = /\((.*?)\)/g;
+  let match;
+
+  while ((match = regex.exec(configMDFileData)) !== null) {
+    paths.push(match[1]); // Push the matched path into the array
   }
+
+  let fileName;
+
+  fileName = path.split("/src/pages/")[1]?.replace(/\/$/, ''); // Remove trailing slash if exists
+  const checkIndex = path.split('/').pop();
+
+  if (checkIndex !== "index.md") {
+    if (path.endsWith('/')) {
+      path = paths.includes(`${fileName}.md`) ? `${path.slice(0, -1)}.md` : `${path}index.md`;
+    }
+    else {
+      path = paths.includes(`${fileName}.md`) ? `${path}.md` : `${path}/index.md`;
+    }
+  }
+
   // impliclty grab .md if there's no extension
-  if(!extension) {
-    path += '.md';
-  }
 
   // const branch = path.split('/')[1];
   // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;

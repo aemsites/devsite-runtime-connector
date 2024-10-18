@@ -16,30 +16,47 @@ import type { Helix } from '@adobe/helix-universal';
 
 function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | 'a') {
   const { log } = ctx;
-  if (!pathOrUrl.startsWith('./') && !pathOrUrl.startsWith('../') && !pathOrUrl.startsWith('/')) {
-    return pathOrUrl;
-  }
+
 
   const {
     root,
     path: docPath,
     owner,
     repo,
+    branch,
+    pathprefix
   } = ctx.attributes.content;
+
+  if (!pathOrUrl.startsWith('./') && !pathOrUrl.startsWith('../') && !pathOrUrl.startsWith('/')) {
+    return pathOrUrl;
+  }
+
+  if (pathOrUrl.startsWith(pathprefix)) {
+    return pathOrUrl;
+  }
 
   log.debug('rewrite')
   const cwd = docPath.split('/').slice(0, -1).join('/');
 
   let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
-  if (resolved.endsWith('.md')) {
-    resolved = resolved.slice(0, -3);
+
+  const projectRoot = '/src/pages/';
+  const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
+  if (resolved.endsWith('.md') || resolved.includes(".md#")) {
+    // resolved = resolved.slice(0, -3);
+    resolved = `${pathprefix}/${relativePath}`;
   } else if (type === 'img') {
+    // use this image URL
+    const imageURL = `${projectRoot}${relativePath}`;
+
+    const fetchImage = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${imageURL}`;
+    resolved = fetchImage;
     // use absolute paths for images, since they will be replaced with mediabus paths once ingested
     // TODO: fix resolved paths for images
     log.debug(`resolved start: ${resolved}`);
-    if (!resolved.startsWith('/')) {
-      resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
-    }
+    // if (!resolved.startsWith('/')) {
+    //   resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
+    // }
     resolved = `${resolved}`;
   }
 
@@ -64,6 +81,22 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
     const attr = els[node.tagName];
     if (attr) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
+      const getNodeProperties = node.properties[attr].toString();
+      if (attr === "href") {
+        if (getNodeProperties.endsWith('index.md')) {
+          node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace("index.md", "");
+        }
+        else if (getNodeProperties.endsWith('md')) {
+          node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').slice(0, -3);
+        } else if (getNodeProperties.includes(".md#")) {
+          node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace(".md", "")
+        }
+        else {
+          node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
+        }
+      }
+
       log.debug('visit');
       node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
       log.debug(`${attr} visited`);
