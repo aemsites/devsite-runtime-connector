@@ -48,10 +48,10 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
     const slotsValue = getAttributeValue(slotsAttr, '');
-    if (!slotsValue) {
-      // TODO: throw error for invalid document
-      break;
-    }
+    // if (!slotsValue) {
+    //   // TODO: throw error for invalid document
+    //   break;
+    // }
     const slots = slotsValue.split(',');
 
     // repeat the block N times if repeat="N" is set
