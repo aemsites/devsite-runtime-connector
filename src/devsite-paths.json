@@ -35,5 +35,12 @@
         "owner": "AdobeDocs",
         "root": "/src/pages/",
         "branch": "eds-migration"
+    },
+    {
+        "pathPrefix": "/app-builder/docs",
+        "repo": "app-builder",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/",
+        "branch": "eds-migration"
     }
 ]
