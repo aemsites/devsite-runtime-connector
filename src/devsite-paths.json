@@ -30,6 +30,12 @@
         "root": "/src/pages/"
     },
     {
+        "pathPrefix": "/photoshop-cpp-sdk",
+        "repo": "photoshop-cpp-sdk",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
+    },
+    {
         "pathPrefix": "/developer-console/docs",
         "repo": "adobe-dev-console",
         "owner": "AdobeDocs",
