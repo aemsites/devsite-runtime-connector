@@ -24,7 +24,7 @@ import devsitePaths from './devsite-paths.json' assert { type: 'json' };
 
 function getUrlExtension(url) {
   let extension;
-  if(url.split('.').length > 1){
+  if (url.split('.').length > 1) {
     extension = url.split(/[#?]/)[0].split('.').pop().trim();
   }
   return extension;
@@ -37,14 +37,14 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   ctx.attributes.content ??= {};
   console.log('ctx.pathInfo', ctx.pathInfo);
 
-  let extension = getUrlExtension(ctx.pathInfo.suffix);
+  const extension = getUrlExtension(ctx.pathInfo.suffix);
 
   // TODO - figure out logic for tacking on md files always add on a trailing slash if no extension found
   // if(!extension) {
   //   ctx.pathInfo.suffix += '/';
   // }
 
-  let suffixSplit = ctx.pathInfo.suffix.split('/');
+  const suffixSplit = ctx.pathInfo.suffix.split('/');
   let suffixSplitRest = suffixSplit.slice(1);
 
   let devsitePathMatch;
@@ -55,40 +55,40 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // find match based on level 3, 2, or 1 transclusion rule
   // if match found in higher level don't do lower level
   if (suffixSplit.length > 2) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/' + suffixSplit[1] + '/' + suffixSplit[2] + '/' + suffixSplit[3]);
-    devsitePathMatchFlag = devsitePathMatch ? true : false;
-    if(devsitePathMatchFlag) {
-      console.log('rest 3')
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/${suffixSplit[3]}`);
+    devsitePathMatchFlag = !!devsitePathMatch;
+    if (devsitePathMatchFlag) {
+      console.log('rest 3');
       suffixSplitRest = suffixSplit.slice(4);
     }
   }
   if (suffixSplit.length > 1 && !devsitePathMatchFlag) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/' + suffixSplit[1] + '/' + suffixSplit[2]);
-    devsitePathMatchFlag = devsitePathMatch ? true : false;
-    if(devsitePathMatchFlag) {
-      console.log('rest 2')
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}`);
+    devsitePathMatchFlag = !!devsitePathMatch;
+    if (devsitePathMatchFlag) {
+      console.log('rest 2');
       suffixSplitRest = suffixSplit.slice(3);
     }
   }
   if (suffixSplit.length > 0 && !devsitePathMatchFlag) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/' + suffixSplit[1]);
-    devsitePathMatchFlag = devsitePathMatch ? true : false;
-    if(devsitePathMatchFlag) {
-      console.log('rest 1')
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}`);
+    devsitePathMatchFlag = !!devsitePathMatch;
+    if (devsitePathMatchFlag) {
+      console.log('rest 1');
       suffixSplitRest = suffixSplit.slice(2);
     }
   }
 
   // fix favicon to retrieve from adp-devsite repo
-  if(ctx.pathInfo.suffix === '/favicon.ico') {
+  if (ctx.pathInfo.suffix === '/favicon.ico') {
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/');
   }
-  
+
   console.log(`devsitePathMatch: ${devsitePathMatch?.pathPrefix}`);
   console.log(`suffixSplitRest: ${suffixSplitRest}`);
 
   // TODO: should this error out if no match is present?
-  if(devsitePathMatch) {
+  if (devsitePathMatch) {
     ctx.attributes.content.owner = devsitePathMatch.owner;
     ctx.attributes.content.repo = devsitePathMatch.repo;
     ctx.attributes.content.pathprefix = devsitePathMatch.pathPrefix;
@@ -96,14 +96,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
     console.log(`ctx.attributes.content.branch: ${ctx.attributes.content.branch}`);
   }
-  
 
   // const [_, repo, ...rest] = ctx.pathInfo.suffix.split('/');
   // if (!repo) {
   //   return new Response('', { status: 400, headers: { 'x-error': 'repo is required' } });
   // }
 
-  let rootPath = devsitePathMatch?.root;
+  const rootPath = devsitePathMatch?.root;
   let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
 
   const configMDFile = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}/src/pages/config.md`;
@@ -122,14 +121,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   let fileName;
 
-  fileName = path.split("/src/pages/")[1]?.replace(/\/$/, ''); // Remove trailing slash if exists
+  fileName = path.split('/src/pages/')[1]?.replace(/\/$/, ''); // Remove trailing slash if exists
   const checkIndex = path.split('/').pop();
 
-  if (checkIndex !== "index.md") {
+  if (checkIndex !== 'index.md') {
     if (path.endsWith('/')) {
       path = paths.includes(`${fileName}.md`) ? `${path.slice(0, -1)}.md` : `${path}index.md`;
-    }
-    else {
+    } else {
       path = paths.includes(`${fileName}.md`) ? `${path}.md` : `${path}/index.md`;
     }
   }
@@ -140,7 +138,6 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;
   // const topNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/topNav.html`;
   // const sideNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/sideNav.html`;
-
 
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
