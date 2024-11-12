@@ -27,6 +27,9 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
     pathprefix
   } = ctx.attributes.content;
 
+  // TODO clean up this logic - it's all over the place and not clear what it's doing
+  // - enforce strict trailing slashes when they apply (when it's the index.md file)
+
   if (!pathOrUrl.startsWith('./') && !pathOrUrl.startsWith('../') && !pathOrUrl.startsWith('/')) {
     return pathOrUrl;
   }
@@ -37,11 +40,11 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
 
   log.debug('rewrite')
   const cwd = docPath.split('/').slice(0, -1).join('/');
-
   let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
 
   const projectRoot = '/src/pages/';
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
+  console.log(`resolved:  ${resolved}`)
   if (resolved.endsWith('.md') || resolved.includes(".md#")) {
     // resolved = resolved.slice(0, -3);
     resolved = `${pathprefix}/${relativePath}`;
@@ -51,8 +54,6 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
 
     const fetchImage = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${imageURL}`;
     resolved = fetchImage;
-    // use absolute paths for images, since they will be replaced with mediabus paths once ingested
-    // TODO: fix resolved paths for images
     log.debug(`resolved start: ${resolved}`);
     // if (!resolved.startsWith('/')) {
     //   resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
@@ -60,7 +61,15 @@ function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | '
     resolved = `${resolved}`;
   }
 
-  resolved = resolved.startsWith(root) ? resolved.substring(root.length) : resolved;
+  console.log(`root: ${path.resolve(root)}`)
+  console.log(`resolved: ${path.resolve(resolved)}`)
+
+  if(resolved === path.resolve(root)) {
+    resolved = `${pathprefix}`; 
+  } else if (resolved.startsWith(root)) {
+    resolved = resolved.substring(root.length);
+  } 
+
   log.debug(`resolved final: ${resolved}`);
   return resolved;
 }
