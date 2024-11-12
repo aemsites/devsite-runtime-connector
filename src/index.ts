@@ -182,8 +182,14 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   // log.debug('topNavContent: ', ctx.attributes.content.topNavContent);
   // log.debug('sideNavContent: ', ctx.attributes.content.sideNavContent);
-  const html = md2markup(ctx);
+  let html = md2markup(ctx);
   log.debug('html: ', html);
+
+  html = html.replace(/https:\/\/youtu\.be\/([a-zA-Z0-9_-]+)(\?[^ ]*)?/g, (match, videoId, queryString) => {
+    const embedUrl = `https://www.youtube.com/embed/${videoId}${queryString ? queryString : ''}`;
+
+    return `<iframe width="560" height="315" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+  });
 
   return new Response(html, {
     status: 200,
