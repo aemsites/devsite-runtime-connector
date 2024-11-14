@@ -12,6 +12,12 @@
         "root": "/src/pages/"
     },
     {
+        "pathPrefix": "/acrobat-sign/developer-guide",
+        "repo": "acrobat-sign-developer-guide",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
+    },
+    {
         "pathPrefix": "/analytics-apis/docs/2.0",
         "repo": "analytics-2.0-apis",
         "owner": "AdobeDocs",
