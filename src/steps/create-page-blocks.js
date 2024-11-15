@@ -15,6 +15,30 @@ import { select } from 'hast-util-select';
 import { toString } from 'hast-util-to-string';
 import { CONTINUE, SKIP, visit } from 'unist-util-visit';
 
+/**
+ * Extracts custom blocks from the markdown string.
+ */
+function extractBlocks(md) {
+  const blockPattern = /<\s*([a-zA-Z0-9_-]+)([^>]*?)\s*\/>/g;
+  const blocks = [];
+  let match;
+
+  while ((match = blockPattern.exec(md)) !== null) {
+    const blockName = match[1].toLowerCase();
+    const attributes = {};
+    const attrPattern = /(\w+)=["']([^"']+)["']/g;
+    let attrMatch;
+    while ((attrMatch = attrPattern.exec(match[2])) !== null) {
+      const [_, key, value] = attrMatch;
+      attributes[key] = value;
+    }
+    blocks.push({ name: blockName, attributes });
+  }
+
+  return blocks;
+}
+
+
 function childNodes(node) {
   return node.children.filter((n) => n.type === 'element');
 }
@@ -45,7 +69,7 @@ function toBlockCSSClassNames(text) {
  * @param {HTMLTTableElement} $table the table element
  * @returns {HTMLDivElement} the resulting div
  */
-function tableToDivs($table) {
+function tableToDivs($table, blocks) {
   const $cards = h('div');
   const $rows = [];
   for (const child of $table.children) {
@@ -76,6 +100,15 @@ function tableToDivs($table) {
     delete $cards.properties.className;
   }
 
+  // Check if the class name matches any block and apply attributes as data-attributes
+  blocks.forEach(block => {
+    if ($cards.properties.className && $cards.properties.className.includes(block.name)) {
+      Object.entries(block.attributes).forEach(([key, value]) => {
+        $cards.properties[key] = value;
+      });
+    }
+  });
+
   // construct page block
   for (const $row of $rows) {
     const $card = h('div');
@@ -97,11 +130,13 @@ function tableToDivs($table) {
  */
 export default function createPageBlocks(ctx) {
   const { attributes: { content: { hast } } } = ctx;
+  const md = ctx.attributes.content.md;
+  const blocks = extractBlocks(md);
   /** @type {import('../bindings').Content['hast']} */
   const phast = hast;
   visit(phast, (node, idx, parent) => {
     if (node.tagName === 'table' && parent.tagName === 'div') {
-      parent.children[idx] = tableToDivs(node);
+      parent.children[idx] = tableToDivs(node, blocks);
       return SKIP;
     }
     return CONTINUE;
