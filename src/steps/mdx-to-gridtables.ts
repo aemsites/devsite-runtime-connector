@@ -65,10 +65,20 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     // block name is the JSX nodename
     const blockName = node.name;
 
-    const totalRows = repeat * slots.length;
-    const slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
-    if (slotsToInsert.length !== totalRows) {
-      // TODO: throw error for invalid slots?
+    let slotsToInsert: RootContent[];
+    if (blockName === 'RedoclyAPIBlock') {
+      slotsToInsert = node.attributes
+        .filter((attribute): attribute is MdxJsxAttribute => attribute != null)
+        .map((attribute) => {
+          const value = typeof attribute.value === 'string' ? attribute.value : attribute.value?.value;
+          return { type: 'code', value: `${attribute.name}=${value}` };
+        });
+    } else {
+      const totalRows = repeat * slots.length;
+      slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
+      if (slotsToInsert.length !== totalRows) {
+        // TODO: throw error for invalid slots?
+      }
     }
 
     mdast.children.splice(i, 1 + slotsToInsert.length, {
