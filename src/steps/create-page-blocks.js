@@ -30,7 +30,8 @@ function extractBlocks(md) {
     let attrMatch;
     while ((attrMatch = attrPattern.exec(match[2])) !== null) {
       const [_, key, value] = attrMatch;
-      attributes[key] = value;
+      let dataKey = `data-${key}`;
+      attributes[dataKey] = value;
     }
     blocks.push({ name: blockName, attributes });
   }
