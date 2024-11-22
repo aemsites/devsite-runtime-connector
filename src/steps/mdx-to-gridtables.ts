@@ -71,7 +71,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
         .filter((attribute): attribute is MdxJsxAttribute => attribute != null)
         .map((attribute) => {
           const value = typeof attribute.value === 'string' ? attribute.value : attribute.value?.value;
-          return { type: 'code', value: `${attribute.name}=${value}` };
+          return { type: 'code', value: `data-${attribute.name}=${value}` };
         });
     } else {
       const totalRows = repeat * slots.length;
