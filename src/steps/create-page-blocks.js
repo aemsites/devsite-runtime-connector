@@ -102,13 +102,13 @@ function tableToDivs($table, blocks) {
   }
 
   // Check if the class name matches any block and apply attributes as data-attributes
-  blocks.forEach(block => {
-    if ($cards.properties.className && $cards.properties.className.includes(block.name)) {
-      Object.entries(block.attributes).forEach(([key, value]) => {
-        $cards.properties[key] = value;
-      });
-    }
-  });
+  // blocks.forEach(block => {
+  //   if ($cards.properties.className && $cards.properties.className.includes(block.name)) {
+  //     Object.entries(block.attributes).forEach(([key, value]) => {
+  //       $cards.properties[key] = value;
+  //     });
+  //   }
+  // });
 
   // construct page block
   for (const $row of $rows) {
