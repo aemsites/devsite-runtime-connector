@@ -36,6 +36,7 @@ function getAttributeValue(attr: MdxJsxAttribute | MdxJsxExpressionAttribute, fa
 
 export default function mdxToBlocks(ctx: Helix.UniversalContext) {
   const { content: { mdast } } = ctx.attributes;
+  const ATTRIBUTE_PREFIX = 'data-';
 
   // for loop since we mutate in the loop
   for (let i = 0; i < mdast.children.length; i += 1) {
@@ -71,7 +72,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
         .filter((attribute): attribute is MdxJsxAttribute => attribute != null)
         .map((attribute) => {
           const value = typeof attribute.value === 'string' ? attribute.value : attribute.value?.value;
-          return { type: 'code', value: `data-${attribute.name}=${value}` };
+          return { type: 'code', value: `${ATTRIBUTE_PREFIX}${attribute.name}=${value}` };
         });
     } else {
       const totalRows = repeat * slots.length;
@@ -96,6 +97,23 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
                   {
                     type: 'text',
                     value: `${blockName} (${variants})`,
+                  },
+                ],
+              },
+            ],
+          },{
+            type: "paragraph",
+            children: [
+              {
+                type: "strong",
+                children: [
+                  {
+                    type: "text",
+                    value: (node.attributes || [])
+                      .filter((attribute) => attribute.name !== "slots")
+                      .map(
+                        (attribute) => `${ATTRIBUTE_PREFIX}${attribute.name}=${attribute.value}`
+                      )
                   },
                 ],
               },
