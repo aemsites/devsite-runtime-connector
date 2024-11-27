@@ -34,6 +34,11 @@ function getAttributeValue(attr: MdxJsxAttribute | MdxJsxExpressionAttribute, fa
   return attr && attr.value && typeof attr.value === 'string' ? attr.value : fallback;
 }
 
+// Type guard to filter only MdxJsxAttribute objects
+function isMdxJsxAttribute(attribute: any): attribute is MdxJsxAttribute {
+  return attribute && typeof attribute.name === 'string';
+}
+
 export default function mdxToBlocks(ctx: Helix.UniversalContext) {
   const { content: { mdast } } = ctx.attributes;
   const ATTRIBUTE_PREFIX = 'data-';
@@ -68,8 +73,8 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     let slotsToInsert: RootContent[];
     if (blockName === 'RedoclyAPIBlock') {
-      slotsToInsert = node.attributes
-        .filter((attribute): attribute is MdxJsxAttribute => attribute != null)
+      slotsToInsert = (node.attributes || [])
+        .filter(isMdxJsxAttribute)
         .map((attribute) => {
           const value = typeof attribute.value === 'string' ? attribute.value : attribute.value?.value;
           return { type: 'code', value: `${ATTRIBUTE_PREFIX}${attribute.name}=${value}` };
@@ -110,10 +115,9 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
                   {
                     type: "text",
                     value: (node.attributes || [])
-                      .filter((attribute) => attribute.name !== "slots")
-                      .map(
-                        (attribute) => `${ATTRIBUTE_PREFIX}${attribute.name}=${attribute.value}`
-                      )
+                    .filter(isMdxJsxAttribute)
+                    .filter((attribute) => attribute.name !== "slots")
+                    .map((attribute) => `${ATTRIBUTE_PREFIX}${attribute.name}=${attribute.value}`)
                   },
                 ],
               },
