@@ -57,7 +57,7 @@
     },
     {
         "pathPrefix": "/adobe-io-events/docs",
-        "repo": "app-builder",
+        "repo": "adobe-io-events",
         "owner": "AdobeDocs",
         "root": "/src/pages/",
         "branch": "eds-migration"
