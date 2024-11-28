@@ -56,7 +56,7 @@
         "branch": "eds-migration"
     },
     {
-        "pathPrefix": "/adobe-io-events/docs",
+        "pathPrefix": "/events/docs",
         "repo": "adobe-io-events",
         "owner": "AdobeDocs",
         "root": "/src/pages/",
