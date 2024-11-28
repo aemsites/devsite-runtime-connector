@@ -56,7 +56,7 @@
         "branch": "eds-migration"
     },
     {
-        "pathPrefix": "/Developer-Distribution-Experience-Cloud/docs",
+        "pathPrefix": "/developer-distribution/experience-cloud/docs",
         "repo": "Developer-Distribution-Experience-Cloud",
         "owner": "AdobeDocs",
         "root": "/src/pages/",
