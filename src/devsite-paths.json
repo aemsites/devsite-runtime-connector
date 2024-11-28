@@ -56,6 +56,13 @@
         "branch": "eds-migration"
     },
     {
+        "pathPrefix": "/developer-distribution/experience-cloud/docs",
+        "repo": "Developer-Distribution-Experience-Cloud",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/",
+        "branch": "eds-migration"
+    },
+    {
         "pathPrefix": "/events/docs",
         "repo": "adobe-io-events",
         "owner": "AdobeDocs",
