@@ -106,23 +106,26 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
                 ],
               },
             ],
-          },{
-            type: "paragraph",
-            children: [
-              {
-                type: "strong",
-                children: [
-                  {
-                    type: "text",
-                    value: (node.attributes || [])
-                    .filter(isMdxJsxAttribute)
-                    .filter((attribute) => attribute.name !== "slots")
-                    .map((attribute) => `${ATTRIBUTE_PREFIX}${attribute.name}=${attribute.value}`)
-                  },
-                ],
-              },
-            ],
           },
+          ...(node.attributes && node.attributes.some(attr => attr.name !== "slots")
+          ? [{
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'strong',
+                  children: [
+                    {
+                      type: 'text',
+                      value: (node.attributes || [])
+                        .filter(isMdxJsxAttribute)
+                        .filter((attribute) => attribute.name !== "slots")
+                        .map((attribute) => `${ATTRIBUTE_PREFIX}${attribute.name}=${attribute.value}`)
+                    },
+                  ],
+                },
+              ],
+            }]
+          : []),
           // remaining is the content from the slots
           // each slot is inserted as a separate row
           ...slotsToInsert,
