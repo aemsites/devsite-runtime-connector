@@ -71,63 +71,99 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     // block name is the JSX nodename
     const blockName = node.name;
 
-    let slotsToInsert: RootContent[];
     if (blockName === 'RedoclyAPIBlock') {
-      slotsToInsert = (node.attributes || [])
+      const attributesToCode = (node.attributes || [])
         .filter(isMdxJsxAttribute)
         .map((attribute) => {
           const value = typeof attribute.value === 'string' ? attribute.value : attribute.value?.value;
-          return { type: 'code', value: `${ATTRIBUTE_PREFIX}${attribute.name}=${value}` };
+          return {
+            type: 'code',
+            value: `${ATTRIBUTE_PREFIX}${attribute.name}=${value}`,
+          };
         });
-    } else {
-      const totalRows = repeat * slots.length;
-      slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
-      if (slotsToInsert.length !== totalRows) {
-        // TODO: throw error for invalid slots?
-      }
-    }
-
-    mdast.children.splice(i, 1 + slotsToInsert.length, {
-      type: 'gridTable',
-      children: [{
-        type: 'gtBody',
+      const blockNameRow = makeGridTableRow({
+        type: 'paragraph',
         children: [
-          // first is the header, containing block name
           {
-            type: 'paragraph',
+            type: 'strong',
             children: [
               {
-                type: 'strong',
-                children: [
-                  {
-                    type: 'text',
-                    value: `${blockName} (${variants})`,
-                  },
-                ],
-              },
-            ],
-          },{
-            type: "paragraph",
-            children: [
-              {
-                type: "strong",
-                children: [
-                  {
-                    type: "text",
-                    value: (node.attributes || [])
-                    .filter(isMdxJsxAttribute)
-                    .filter((attribute) => attribute.name !== "slots")
-                    .map((attribute) => `${ATTRIBUTE_PREFIX}${attribute.name}=${attribute.value}`)
-                  },
-                ],
+                type: 'text',
+                value: `${blockName}`, 
               },
             ],
           },
-          // remaining is the content from the slots
-          // each slot is inserted as a separate row
-          ...slotsToInsert,
-        ].map(makeGridTableRow),
-      }],
-    } as unknown as RootContent);
+        ],
+      });
+
+      mdast.children.splice(i, 1, {
+        type: 'gridTable',
+        children: [
+          {
+            type: 'gtBody',
+            children: [
+              blockNameRow,
+              ...attributesToCode.map(makeGridTableRow),
+            ],
+          },
+        ],
+      } as unknown as RootContent);
+    } else {
+      const totalRows = repeat * slots.length;
+      const slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
+    
+      if (slotsToInsert.length !== totalRows) {
+        // TODO: throw error for invalid slots?
+      }
+    
+      const attributeRows = (node.attributes || [])
+        .filter(isMdxJsxAttribute)
+        .map((attribute) => ({
+          type: 'gtRow',
+          children: [
+            {
+              type: 'gtCell',
+              children: [
+                {
+                  type: 'strong',
+                  children: [
+                    {
+                      type: 'text',
+                      value: `${ATTRIBUTE_PREFIX}${attribute.name}=${attribute.value}`,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }));
+    
+      mdast.children.splice(i, 1 + slotsToInsert.length, {
+        type: 'gridTable',
+        children: [
+          {
+            type: 'gtBody',
+            children: [
+              makeGridTableRow({
+                type: 'paragraph',
+                children: [
+                  {
+                    type: 'strong',
+                    children: [
+                      {
+                        type: 'text',
+                        value: `${blockName} (${variants})`,
+                      },
+                    ],
+                  },
+                ],
+              }),
+              ...attributeRows,
+              ...slotsToInsert.map(makeGridTableRow),
+            ],
+          },
+        ],
+      } as unknown as RootContent);
+    }    
   }
 }
