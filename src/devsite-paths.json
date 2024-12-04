@@ -68,5 +68,12 @@
         "owner": "AdobeDocs",
         "root": "/src/pages/",
         "branch": "eds-migration"
+    },
+    {
+        "pathPrefix": "/developer-distribution/creative-cloud/docs",
+        "repo": "developer-distribute",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/",
+        "branch": "eds-migration"
     }
 ]
