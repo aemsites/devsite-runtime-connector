@@ -176,7 +176,72 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     });
   }
 
-  ctx.attributes.content.md = await res.text();
+  const content = await res.text();
+
+  const resolvePath = (relativePath, currentDirectory) => {
+    const baseDir = currentDirectory.substring(0, currentDirectory.lastIndexOf('/'));
+  
+    if (relativePath.startsWith('../')) {
+      return baseDir.substring(0, baseDir.lastIndexOf('/')) + relativePath.slice(2);
+    }
+  
+    if (relativePath.startsWith('./')) {
+      return baseDir + relativePath.slice(1);
+    }
+  
+    return baseDir + '/' + relativePath;
+  };
+  
+  const fetchData = async (url) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch from URL: ${url}`);
+    }
+    const text = await response.text();
+    return text.replace(/^---[\s\S]*?---\s*/g, '').trim();
+  };
+  
+  const replaceComponentWithFragment = async (content, componentName, pathName) => {
+  
+    if (pathName.endsWith('md')) {
+      const resolvedPath = resolvePath(pathName, path);
+      const rawUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${resolvedPath}`;
+  
+      try {
+        const fragment = await fetchData(rawUrl);
+  
+        if (!fragment) {
+          return content;
+        }
+  
+        const componentTag = `<${componentName}\\s*/?>`;
+        return content.replace(new RegExp(componentTag, 'g'), fragment);
+      } catch (error) {
+        console.error('Error fetching data for', pathName, error);
+        return content;
+      }
+    } else {
+      console.log('Handling non-md path:', pathName);
+      return content;
+    }
+  };
+  
+  const extractImportPaths = (content) => {
+    return [...content.matchAll(/import\s+(\w+)\s+from\s+'([^']+)'/g)].map(match => ({
+      componentName: match[1],
+      pathName: match[2]
+    }));
+  };
+  
+    const importPaths = extractImportPaths(content);
+    let updatedContent = content;
+  
+    for (const { componentName, pathName } of importPaths) {
+      updatedContent = await replaceComponentWithFragment(updatedContent, componentName, pathName);
+    }
+  
+    ctx.attributes.content.md = updatedContent;
+
   // ctx.attributes.content.topNavContent = await topNavRes.text();
   // ctx.attributes.content.sideNavContent = await sideNavRes.text();
 
