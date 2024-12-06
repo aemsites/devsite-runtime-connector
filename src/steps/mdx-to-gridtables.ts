@@ -31,7 +31,10 @@ function getAttribute(node: MdxJsxFlowElement, name: string) {
 }
 
 function getAttributeValue(attr: MdxJsxAttribute | MdxJsxExpressionAttribute, fallback?: string) {
-  return attr && attr.value && typeof attr.value === 'string' ? attr.value : fallback;
+  if (attr && attr.value) {
+    return typeof attr.value === 'string' ? attr.value : attr.value.value;
+  }
+  return fallback;
 }
 
 // Type guard to filter only MdxJsxAttribute objects
@@ -83,7 +86,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
           children: [
             {
               type: 'code',
-              value: `${ATTRIBUTE_PREFIX}${attribute.name}=${attribute.value}`,
+              value: `${ATTRIBUTE_PREFIX}${attribute.name}=${getAttributeValue(attribute, '')}`,
             },
           ],
         },
