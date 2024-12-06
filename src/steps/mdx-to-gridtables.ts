@@ -35,8 +35,9 @@ function getAttributeValue(attr: MdxJsxAttribute | MdxJsxExpressionAttribute, fa
 }
 
 // Type guard to filter only MdxJsxAttribute objects
-function isMdxJsxAttribute(attribute: any): attribute is MdxJsxAttribute {
-  return attribute && typeof attribute.name === 'string';
+function isMdxJsxAttribute(attribute: MdxJsxAttribute| MdxJsxExpressionAttribute)
+: attribute is MdxJsxAttribute {
+  return attribute != null;
 }
 
 export default function mdxToBlocks(ctx: Helix.UniversalContext) {
