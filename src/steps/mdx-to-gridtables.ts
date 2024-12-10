@@ -118,7 +118,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
               ],
             }),
             // Add attribute rows
-            ...attributeRows,
+            ...(attributeRows.length > 0 ? attributeRows : []),
             // Add content from the slots
             ...slotsToInsert.map(makeGridTableRow),
           ],
