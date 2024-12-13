@@ -35,7 +35,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   const { log } = ctx;
   ctx.attributes ??= {};
   ctx.attributes.content ??= {};
-  console.log('ctx.pathInfo', ctx.pathInfo);
+  // console.log('ctx.pathInfo', ctx.pathInfo);
 
   let extension = getUrlExtension(ctx.pathInfo.suffix);
 
@@ -50,7 +50,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let devsitePathMatch;
   let devsitePathMatchFlag = false;
 
-  console.log(`extension ${extension}`);
+  // console.log(`extension ${extension}`);
 
   // find match based on level 3, 2, or 1 transclusion rule
   // if match found in higher level don't do lower level
@@ -58,7 +58,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/${suffixSplit[3]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
-      console.log('rest 3');
+      // console.log('rest 3');
       suffixSplitRest = suffixSplit.slice(4);
     }
   }
@@ -66,7 +66,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
-      console.log('rest 2');
+      // console.log('rest 2');
       suffixSplitRest = suffixSplit.slice(3);
     }
   }
@@ -74,7 +74,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
-      console.log('rest 1');
+      // console.log('rest 1');
       suffixSplitRest = suffixSplit.slice(2);
     }
   }
@@ -84,8 +84,8 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/');
   }
 
-  console.log(`devsitePathMatch: ${devsitePathMatch?.pathPrefix}`);
-  console.log(`suffixSplitRest: ${suffixSplitRest}`);
+  // console.log(`devsitePathMatch: ${devsitePathMatch?.pathPrefix}`);
+  // console.log(`suffixSplitRest: ${suffixSplitRest}`);
 
   // TODO: should this error out if no match is present?
   if (devsitePathMatch) {
@@ -94,7 +94,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     ctx.attributes.content.pathprefix = devsitePathMatch.pathPrefix;
     ctx.attributes.content.branch = devsitePathMatch.branch ? devsitePathMatch.branch : 'main';
 
-    console.log(`ctx.attributes.content.branch: ${ctx.attributes.content.branch}`);
+    // console.log(`ctx.attributes.content.branch: ${ctx.attributes.content.branch}`);
   }
 
   // const [_, repo, ...rest] = ctx.pathInfo.suffix.split('/');
@@ -123,15 +123,15 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
 
-  console.log(`path: ${path}`);
-  console.log(`ctx.attributes.content.path: ${ctx.attributes.content.path}`);
+  // console.log(`path: ${path}`);
+  // console.log(`ctx.attributes.content.path: ${ctx.attributes.content.path}`);
   // ctx.attributes.content.topNavUrl = topNavUrl;
   // ctx.attributes.content.sideNavUrl = sideNavUrl;
 
   // TODO: need to determine which branch we want to pull from based on url
   // default to main
   const gitUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${path}`;
-  console.log(`gitUrl: ${gitUrl}`);
+  // console.log(`gitUrl: ${gitUrl}`);
   const res = await fetch(gitUrl);
   if (!res.ok) {
     const status = res.status < 500 ? res.status : 500;
@@ -165,7 +165,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   //   });
   // }
 
-  log.debug('file name: ', ctx.attributes);
+  // log.debug('file name: ', ctx.attributes);
   if (!path.endsWith('.md')) {
     // dont convert non-markdown content
     return new Response(await res.arrayBuffer(), {
@@ -220,7 +220,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
         return content;
       }
     } else {
-      console.log('Handling non-md path:', pathName);
+      // console.log('Handling non-md path:', pathName);
       return content;
     }
   };
@@ -247,7 +247,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // log.debug('topNavContent: ', ctx.attributes.content.topNavContent);
   // log.debug('sideNavContent: ', ctx.attributes.content.sideNavContent);
   const html = md2markup(ctx);
-  log.debug('html: ', html);
+  // log.debug('html: ', html);
 
   return new Response(html, {
     status: 200,
