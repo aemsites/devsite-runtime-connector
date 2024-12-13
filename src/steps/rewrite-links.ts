@@ -17,14 +17,13 @@ import type { Helix } from '@adobe/helix-universal';
 export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | 'a') {
   const { log } = ctx;
 
-
   const {
     root,
     path: docPath,
     owner,
     repo,
     branch,
-    pathprefix
+    pathprefix,
   } = ctx.attributes.content;
 
   // TODO clean up this logic - it's all over the place and not clear what it's doing
@@ -38,14 +37,14 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     return pathOrUrl;
   }
 
-  log.debug('rewrite')
+  log.debug('rewrite');
   const cwd = docPath.split('/').slice(0, -1).join('/');
   let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
 
   const projectRoot = '/src/pages/';
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
-  console.log(`resolved:  ${resolved}`)
-  if (resolved.endsWith('.md') || resolved.includes(".md#")) {
+  console.log(`resolved:  ${resolved}`);
+  if (resolved.endsWith('.md') || resolved.includes('.md#')) {
     // resolved = resolved.slice(0, -3);
     resolved = `${pathprefix}/${relativePath}`;
   } else if (type === 'img') {
@@ -61,14 +60,14 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     resolved = `${resolved}`;
   }
 
-  console.log(`root: ${path.resolve(root)}`)
-  console.log(`resolved: ${path.resolve(resolved)}`)
+  console.log(`root: ${path.resolve(root)}`);
+  console.log(`resolved: ${path.resolve(resolved)}`);
 
-  if(resolved === path.resolve(root)) {
-    resolved = `${pathprefix}`; 
+  if (resolved === path.resolve(root)) {
+    resolved = `${pathprefix}`;
   } else if (resolved.startsWith(root)) {
     resolved = resolved.substring(root.length);
-  } 
+  }
 
   log.debug(`resolved final: ${resolved}`);
   return resolved;
@@ -92,16 +91,14 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 
       const getNodeProperties = node.properties[attr].toString();
-      if (attr === "href") {
+      if (attr === 'href') {
         if (getNodeProperties.endsWith('index.md')) {
-          node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace("index.md", "");
-        }
-        else if (getNodeProperties.endsWith('md')) {
+          node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace('index.md', '');
+        } else if (getNodeProperties.endsWith('md')) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').slice(0, -3);
-        } else if (getNodeProperties.includes(".md#")) {
-          node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace(".md", "")
-        }
-        else {
+        } else if (getNodeProperties.includes('.md#')) {
+          node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace('.md', '');
+        } else {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
         }
       }
@@ -109,7 +106,6 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
       log.debug('visit');
       node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
       log.debug(`${attr} visited`);
-
     }
     return CONTINUE;
   });
