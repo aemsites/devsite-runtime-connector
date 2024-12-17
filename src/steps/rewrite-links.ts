@@ -14,7 +14,7 @@ import { CONTINUE, visit } from 'unist-util-visit';
 import path from 'path';
 import type { Helix } from '@adobe/helix-universal';
 
-function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | 'a') {
+export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | 'a') {
   const { log } = ctx;
 
 
