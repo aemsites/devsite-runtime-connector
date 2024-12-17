@@ -13,6 +13,7 @@
 import { Helix } from '@adobe/helix-universal';
 import type { MdxJsxFlowElement, MdxJsxAttribute, MdxJsxExpressionAttribute } from 'mdast-util-mdx-jsx';
 import type { RootContent } from 'mdast';
+import { resolve } from './rewrite-links.js';
 
 function makeGridTableRow(child: RootContent): RootContent {
   return {
@@ -94,7 +95,20 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     }));
 
     const totalRows = repeat * slots.length;
-    const slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
+    let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
+
+    if (node.name === "Embed") { //This is for embedding local videos
+      slotsToInsert = slotsToInsert.map((val) => {
+        const valWithChildren = val as { children: Array<any> };
+        if (valWithChildren.children) {
+          valWithChildren.children = valWithChildren.children.map((data) => {
+            const updatedValue = resolve(ctx, data.value, 'img');
+            return { ...data, value: updatedValue };
+          });
+        }
+        return val;
+      });
+    }
 
     mdast.children.splice(i, 1 + slotsToInsert.length, {
       type: 'gridTable',
