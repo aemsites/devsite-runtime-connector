@@ -42,6 +42,12 @@
         "root": "/src/pages/"
     },
     {
+        "pathPrefix": "/g11n-translation-service",
+        "repo": "g11n-translation-service",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
+    },
+    {
         "pathPrefix": "/developer-console/docs",
         "repo": "adobe-dev-console",
         "owner": "AdobeDocs",
