@@ -18,7 +18,9 @@ export default function removeCodeClasses(ctx: Helix.UniversalContext) {
 
   visit(hast, (node) => {
     if (node.type === 'element' && node.tagName === 'code') {
-      delete node.properties.className;
+      if (!node.properties.className.some(className => className.includes('language'))) {
+        delete node.properties.className;
+      }
     }
 
     return CONTINUE;
