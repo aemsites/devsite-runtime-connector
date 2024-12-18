@@ -42,6 +42,12 @@
         "root": "/src/pages/"
     },
     {
+        "pathPrefix": "/g11n-translation-service",
+        "repo": "g11n-translation-service",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
+    },
+    {
         "pathPrefix": "/developer-console/docs",
         "repo": "adobe-dev-console",
         "owner": "AdobeDocs",
@@ -72,6 +78,13 @@
     {
         "pathPrefix": "/developer-distribution/creative-cloud/docs",
         "repo": "developer-distribute",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/",
+        "branch": "eds-migration"
+    },
+    {
+        "pathPrefix": "/app-builder-template-registry",
+        "repo": "app-builder-template-registry",
         "owner": "AdobeDocs",
         "root": "/src/pages/",
         "branch": "eds-migration"
