@@ -97,7 +97,7 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace("index.md", "");
         } else if (getNodeProperties.includes('index.md')) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace("index.md", "");
-        } else if (getNodeProperties.endsWith('md')) {
+        } else if (getNodeProperties.endsWith('.md')) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').slice(0, -3);
         } else if (getNodeProperties.includes(".md#")) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace(".md", "")
