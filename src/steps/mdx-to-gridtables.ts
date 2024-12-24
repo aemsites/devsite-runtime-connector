@@ -15,15 +15,15 @@ import type { MdxJsxFlowElement, MdxJsxAttribute, MdxJsxExpressionAttribute } fr
 import type { RootContent } from 'mdast';
 import { resolve } from './rewrite-links.js';
 
-function makeGridTableRow(child: RootContent): RootContent {
+function makeGridTableRow(cells: RootContent[]): RootContent {
   return {
     type: 'gtRow',
-    children: [
+    children: cells.map((cell) => (
       {
         type: 'gtCell',
-        children: [child],
-      },
-    ],
+        children: [cell],
+      }
+    )),
   } as unknown as RootContent;
 }
 
@@ -110,14 +110,16 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       });
     }
 
-    mdast.children.splice(i, 1 + slotsToInsert.length, {
+    const rowsToInsert = slotsToInsert.map((slot) => [slot]);
+
+    mdast.children.splice(i, 1 + rowsToInsert.length, {
       type: 'gridTable',
       children: [
         {
           type: 'gtBody',
           children: [
             // Add block name as a header row
-            makeGridTableRow({
+            makeGridTableRow([{
               type: 'paragraph',
               children: [
                 {
@@ -130,11 +132,11 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
                   ],
                 },
               ],
-            }),
+            }]),
             // Add attribute rows
             ...(attributeRows.length > 0 ? attributeRows : []),
             // Add content from the slots
-            ...slotsToInsert.map(makeGridTableRow),
+            ...rowsToInsert.map(makeGridTableRow),
           ],
         },
       ],
