@@ -44,6 +44,20 @@ function isMdxJsxAttribute(attribute: MdxJsxAttribute| MdxJsxExpressionAttribute
   return attribute != null;
 }
 
+function listToMatrix<T>(list: T[], width: number): T[][] {
+  const matrix: T[][] = [];
+
+  for (let i = 0, k = -1; i < list.length; i += 1) {
+      if (i % width === 0) {
+          k += 1;
+          matrix[k] = [];
+      }
+      matrix[k].push(list[i]);
+  }
+
+  return matrix;
+}
+
 export default function mdxToBlocks(ctx: Helix.UniversalContext) {
   const { content: { mdast } } = ctx.attributes;
   const ATTRIBUTE_PREFIX = 'data-';
@@ -110,7 +124,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       });
     }
 
-    const rowsToInsert = slotsToInsert.map((slot) => [slot]);
+    const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
 
     mdast.children.splice(i, 1 + rowsToInsert.length, {
       type: 'gridTable',
