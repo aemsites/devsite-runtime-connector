@@ -97,7 +97,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     const totalRows = repeat * slots.length;
     let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
 
-    if (node.name === "Embed") { //This is for embedding local videos
+    if (node.name === 'Embed') { // This is for embedding local videos
       slotsToInsert = slotsToInsert.map((val) => {
         const valWithChildren = val as { children: Array<any> };
         if (valWithChildren.children) {
