@@ -88,5 +88,12 @@
         "owner": "AdobeDocs",
         "root": "/src/pages/",
         "branch": "eds-migration"
+    },
+    {
+        "pathPrefix": "/express/add-ons/docs",
+        "repo": "express-add-ons-docs",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/",
+        "branch": "eds-migration"
     }
 ]
