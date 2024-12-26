@@ -95,5 +95,12 @@
         "owner": "AdobeDocs",
         "root": "/src/pages/",
         "branch": "eds-migration"
+    },
+    {
+        "pathPrefix": "/runtime/docs/",
+        "repo": "adobe-io-runtime",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/",
+        "branch": "eds-migration"
     }
 ]
