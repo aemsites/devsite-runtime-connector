@@ -15,15 +15,15 @@ import type { MdxJsxFlowElement, MdxJsxAttribute, MdxJsxExpressionAttribute } fr
 import type { RootContent } from 'mdast';
 import { resolve } from './rewrite-links.js';
 
-function makeGridTableRow(child: RootContent): RootContent {
+function makeGridTableRow(cells: RootContent[]): RootContent {
   return {
     type: 'gtRow',
-    children: [
+    children: cells.map((cell) => (
       {
         type: 'gtCell',
-        children: [child],
-      },
-    ],
+        children: [cell],
+      }
+    )),
   } as unknown as RootContent;
 }
 
@@ -42,6 +42,20 @@ function getAttributeValue(attr: MdxJsxAttribute | MdxJsxExpressionAttribute, fa
 function isMdxJsxAttribute(attribute: MdxJsxAttribute| MdxJsxExpressionAttribute)
 : attribute is MdxJsxAttribute {
   return attribute != null;
+}
+
+function listToMatrix<T>(list: T[], width: number): T[][] {
+  const matrix: T[][] = [];
+
+  for (let i = 0, k = -1; i < list.length; i += 1) {
+      if (i % width === 0) {
+          k += 1;
+          matrix[k] = [];
+      }
+      matrix[k].push(list[i]);
+  }
+
+  return matrix;
 }
 
 export default function mdxToBlocks(ctx: Helix.UniversalContext) {
@@ -94,10 +108,10 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       ],
     }));
 
-    const totalRows = repeat * slots.length;
-    let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalRows);
+    const totalSlots = repeat * slots.length;
+    let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalSlots);
 
-    if (node.name === "Embed") { //This is for embedding local videos
+    if (node.name === 'Embed') { // This is for embedding local videos
       slotsToInsert = slotsToInsert.map((val) => {
         const valWithChildren = val as { children: Array<any> };
         if (valWithChildren.children) {
@@ -110,14 +124,16 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       });
     }
 
-    mdast.children.splice(i, 1 + slotsToInsert.length, {
+    const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
+
+    mdast.children.splice(i, 1 + rowsToInsert.length, {
       type: 'gridTable',
       children: [
         {
           type: 'gtBody',
           children: [
             // Add block name as a header row
-            makeGridTableRow({
+            makeGridTableRow([{
               type: 'paragraph',
               children: [
                 {
@@ -130,11 +146,11 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
                   ],
                 },
               ],
-            }),
+            }]),
             // Add attribute rows
             ...(attributeRows.length > 0 ? attributeRows : []),
             // Add content from the slots
-            ...slotsToInsert.map(makeGridTableRow),
+            ...rowsToInsert.map(makeGridTableRow),
           ],
         },
       ],
