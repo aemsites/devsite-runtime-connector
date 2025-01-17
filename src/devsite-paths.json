@@ -111,7 +111,7 @@
         "branch": "eds-migration"
     },
     {
-        "pathPrefix": "/get-credential",
+        "pathPrefix": "/express/embed-sdk/docs",
         "repo": "cc-everywhere",
         "owner": "AdobeDocs",
         "root": "/src/pages/",
