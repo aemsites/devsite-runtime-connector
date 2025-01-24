@@ -40,7 +40,7 @@ function wrapHtml(
 ${content
       .split('\n')
       .filter((line, i, arr) => (i !== 0 && i !== arr.length - 1) || !!line.trim())
-      .map((line) => `${line}`).join('\n')}
+      .join('\n')}
     </main>
     <footer></footer>
   </body>
