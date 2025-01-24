@@ -21,7 +21,7 @@ function wrapHtml(
   isDocumentationMode: boolean,
   hideBreadcrumbNav?: string,
 ): string {
-  let documentationString = `<meta name="template" content="documentation">`;
+  const documentationString = '<meta name="template" content="documentation">';
   return `\
 <!DOCTYPE html>
 <html>
@@ -40,7 +40,7 @@ function wrapHtml(
 ${content
       .split('\n')
       .filter((line, i, arr) => (i !== 0 && i !== arr.length - 1) || !!line.trim())
-      .map((line) => `        ${line}`).join('\n')}
+      .join('\n')}
     </main>
     <footer></footer>
   </body>
@@ -78,9 +78,9 @@ export default function stringify(ctx: Helix.UniversalContext) {
   // TODO : think about setting this in an intuitive way rather than
   // set to documetation mode unless its the root index file in the docs
   // which currently matches what gatsby does
-  let documetationMode = ctx.attributes.content.path === '/src/pages/index.md' ? false : true;
-  let pathprefix = ctx.attributes.content.pathprefix;
-  let githubBlobPath = `https://github.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/blob/${ctx.attributes.content.branch}${ctx.attributes.content.path}`;
+  const documetationMode = ctx.attributes.content.path !== '/src/pages/index.md';
+  const { pathprefix } = ctx.attributes.content;
+  const githubBlobPath = `https://github.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/blob/${ctx.attributes.content.branch}${ctx.attributes.content.path}`;
   const hideBreadcrumbNav = parseHideBreadcrumbNav(ctx.attributes.content.md);
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
