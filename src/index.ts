@@ -87,13 +87,21 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   console.log(`devsitePathMatch: ${devsitePathMatch?.pathPrefix}`);
   console.log(`suffixSplitRest: ${suffixSplitRest}`);
 
+  // pull from specified branch described in the hacky x-content-source-authorization header
+  // this allow us to deploy to main--adp-devsite-stage--adobedocs.hlx.page
+  let branchHeader = req.headers.get('x-content-source-authorization');
+
   // TODO: should this error out if no match is present?
   if (devsitePathMatch) {
     ctx.attributes.content.owner = devsitePathMatch.owner;
     ctx.attributes.content.repo = devsitePathMatch.repo;
     ctx.attributes.content.pathprefix = devsitePathMatch.pathPrefix;
-    ctx.attributes.content.branch = devsitePathMatch.branch ? devsitePathMatch.branch : 'main';
 
+    if(branchHeader) {
+      ctx.attributes.content.branch = branchHeader;
+    } else {
+      ctx.attributes.content.branch = devsitePathMatch.branch ? devsitePathMatch.branch : 'main';
+    }
     console.log(`ctx.attributes.content.branch: ${ctx.attributes.content.branch}`);
   }
 
