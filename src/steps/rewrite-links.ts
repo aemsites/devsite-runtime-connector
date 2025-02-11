@@ -92,7 +92,9 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 
       const getNodeProperties = node.properties[attr].toString();
-      if (attr === "href") {
+      const isExternal = /^(https?:)?\/\//.test(getNodeProperties);
+
+      if (attr === "href" && !isExternal) {
         if (getNodeProperties.endsWith('index.md')) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace("index.md", "");
         } else if (getNodeProperties.includes('index.md')) {
