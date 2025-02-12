@@ -119,9 +119,9 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     path += 'index.md';
     extension = '.md';
   }
-  // impliclty grab .md if there's no extension
-  if (!extension) {
-    path += '.md';
+  // impliclty grab .md if it's a file
+  else if (!path.endsWith('.md') && !path.endsWith('/')) {
+      path += '.md';
   }
 
   // const branch = path.split('/')[1];
