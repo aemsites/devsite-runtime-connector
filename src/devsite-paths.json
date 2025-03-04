@@ -48,6 +48,12 @@
         "root": "/src/pages/"
     },
     {
+        "pathPrefix": "/adobe-connect-sdk",
+        "repo": "adobe-connect-sdk",
+        "owner": "AdobeDocs",
+        "root": "/src/pages/"
+    },
+    {
         "pathPrefix": "/developer-console/docs",
         "repo": "adobe-dev-console",
         "owner": "AdobeDocs",
