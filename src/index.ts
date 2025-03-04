@@ -16,7 +16,6 @@ import { Request, Response } from '@adobe/fetch';
 // eslint-disable-next-line
 import { createAdapter } from '../node_modules/@adobe/helix-universal/src/openwhisk-adapter.js';
 import md2markup from './md2markup.js';
-import devsitePaths from './devsite-paths.json' assert { type: 'json' };
 
 // test urls
 // http://localhost:3000/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=main/src/pages
@@ -51,6 +50,26 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let devsitePathMatchFlag = false;
 
   console.log(`extension ${extension}`);
+
+  let devsitePaths;
+  let devsitePathsUrl;
+  // retrieve the devsitepaths.json file based on if authorization is present
+  if(req.headers.get('authorization')) {
+    devsitePathsUrl = `https://main--adp-devsite-stage--adobedocs.aem.live/franklin_assets/devsitepaths.json`;
+  } else {
+    devsitePathsUrl = `https://main--adp-devsite--adobedocs.aem.live/franklin_assets/devsitepaths.json`;
+  }
+
+  await fetch('https://main--adp-devsite--adobedocs.aem.live/franklin_assets/devsitepaths.json')
+  .then(function(response) {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error('Unable to fetch ${}');
+    }
+  }).then(function(data) {
+    devsitePaths = data.data;
+  });
 
   // find match based on level 3, 2, or 1 transclusion rule
   // if match found in higher level don't do lower level
