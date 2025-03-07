@@ -60,7 +60,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathsUrl = `https://main--adp-devsite--adobedocs.aem.live/franklin_assets/devsitepaths.json`;
   }
 
-  await fetch('https://main--adp-devsite--adobedocs.aem.live/franklin_assets/devsitepaths.json')
+  await fetch(devsitePathsUrl)
   .then(function(response) {
     if (response.ok) {
       return response.json();
@@ -68,13 +68,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
       throw new Error('Unable to fetch ${}');
     }
   }).then(function(data) {
-    devsitePaths = data.data;
+    devsitePaths = data?.data;
   });
 
   // find match based on level 3, 2, or 1 transclusion rule
   // if match found in higher level don't do lower level
   if (suffixSplit.length > 2) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/${suffixSplit[3]}`);
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/${suffixSplit[3]}/`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
       console.log('rest 3');
@@ -82,7 +82,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     }
   }
   if (suffixSplit.length > 1 && !devsitePathMatchFlag) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}`);
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
       console.log('rest 2');
@@ -90,7 +90,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     }
   }
   if (suffixSplit.length > 0 && !devsitePathMatchFlag) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}`);
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
       console.log('rest 1');
