@@ -74,7 +74,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // find match based on level 3, 2, or 1 transclusion rule
   // if match found in higher level don't do lower level
   if (suffixSplit.length > 2) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/${suffixSplit[3]}/`);
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/${suffixSplit[3]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
       console.log('rest 3');
@@ -82,7 +82,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     }
   }
   if (suffixSplit.length > 1 && !devsitePathMatchFlag) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/`);
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
       console.log('rest 2');
@@ -90,7 +90,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     }
   }
   if (suffixSplit.length > 0 && !devsitePathMatchFlag) {
-    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/`);
+    devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
       console.log('rest 1');
@@ -108,7 +108,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   // pull from specified branch described in the hacky x-content-source-authorization header
   // this allow us to deploy to main--adp-devsite-stage--adobedocs.hlx.page
-  let branchHeader = req.headers.get('x-content-source-authorization');
+  let branchHeader = req.headers.get('authorization');
   console.log(`branchHeader: ${branchHeader}`);
   // TODO: should this error out if no match is present?
   if (devsitePathMatch) {
