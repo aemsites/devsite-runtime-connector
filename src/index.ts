@@ -116,10 +116,11 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     ctx.attributes.content.repo = devsitePathMatch.repo;
     ctx.attributes.content.pathprefix = devsitePathMatch.pathPrefix;
 
+    console.log(`branchHeader: ${branchHeader}`); 
     if(branchHeader) {
       ctx.attributes.content.branch = branchHeader;
     } else {
-      ctx.attributes.content.branch = devsitePathMatch.branch ? devsitePathMatch.branch : 'main';
+      ctx.attributes.content.branch = 'main';
     }
     console.log(`ctx.attributes.content.branch: ${ctx.attributes.content.branch}`);
   }
