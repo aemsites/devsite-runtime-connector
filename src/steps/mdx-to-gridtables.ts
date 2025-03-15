@@ -124,6 +124,96 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       });
     }
 
+    if (node.name === 'GetCredential') {
+      function processAttributes(attributes: any[]): Record<string, string> {
+        return (attributes || []).reduce((acc: Record<string, string>, attr: any) => {
+          if (attr?.name) {
+            acc[attr.name] = getAttributeValue(attr, '');
+          }
+          return acc;
+        }, {});
+      }
+    
+      // Recursive function to process children and construct the JSON structure
+      function processChildrenAsJson(children: any[]): any[] {
+        return (children || [])
+          .map((child) => {
+            switch (child.type) {
+              case 'mdxJsxFlowElement':
+                return {
+                  name: child.name,
+                  attributes: processAttributes(child.attributes || []),
+                  children: processChildrenAsJson(child.children || []),
+                };
+              case 'paragraph': {
+                const linkContent = child.children
+                  ?.map((c: any) => {
+                    if (c.type === 'link') {
+                      const href = c.url || '';
+                      const text = c.children
+                        ?.map((linkChild: any) =>
+                          linkChild.type === 'text' ? linkChild.value : ''
+                        )
+                        .join('');
+                      return `[${text}](${href})`;
+                    }
+                    return '';
+                  })
+                  .join('');
+                if (linkContent) {
+                  return {
+                    type: 'link',
+                    content: linkContent,
+                    href: child.children?.[0]?.url || '',
+                  };
+                }
+                const paragraphContent = child.children
+                  ?.map((c: any) => (c.type === 'text' ? c.value : ''))
+                  .join('');
+                return paragraphContent
+                  ? { type: 'paragraph', content: paragraphContent }
+                  : null;
+              }
+              case 'link':
+                return {
+                  type: 'link',
+                  content: child.children
+                    ?.map((c: any) => (c.type === 'text' ? c.value : ''))
+                    .join('') || '',
+                  href: child.url || '',
+                };
+              case 'heading':
+                return {
+                  type: `heading-${child.depth || 1}`,
+                  content:
+                    child.children
+                      ?.map((c: any) => (c.type === 'text' ? c.value : ''))
+                      .join('') || '',
+                };
+              case 'text':
+                return { type: 'text', content: child.value || '' };
+              default:
+                return null;
+            }
+          })
+          .filter(Boolean); 
+      }
+    
+      const getCredentialJson = {
+        name: node.name,
+        attributes: processAttributes(node.attributes || []),
+        children: processChildrenAsJson(node.children || []),
+      };
+
+      slotsToInsert = [
+        {
+          type: 'code',
+          value: JSON.stringify(getCredentialJson, null, 2),
+        },
+        ...slotsToInsert,
+      ];
+    } 
+
     const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
 
     mdast.children.splice(i, 1 + totalSlots, {
