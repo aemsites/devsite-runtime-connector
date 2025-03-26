@@ -20,6 +20,7 @@ function wrapHtml(
   githubBlobPath: string,
   isDocumentationMode: boolean,
   hideBreadcrumbNav?: string,
+  contributorsArray? : Array<string>
 ): string {
   const documentationString = '<meta name="template" content="documentation">';
   return `\
@@ -31,6 +32,7 @@ function wrapHtml(
     <meta name="source" content="github">
     <meta name="pathprefix" content="${pathprefix}">
     <meta name="githubblobpath" content="${githubBlobPath}">
+    <meta name="contributors" content="${contributorsArray.join(',')}">
     ${isDocumentationMode ? documentationString : ''}
     ${hideBreadcrumbNav ? `<meta name="hidebreadcrumbnav" content="${hideBreadcrumbNav}">` : ''}
   </head>
@@ -82,7 +84,28 @@ export default function stringify(ctx: Helix.UniversalContext) {
   const { pathprefix } = ctx.attributes.content;
   const githubBlobPath = `https://github.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/blob/${ctx.attributes.content.branch}${ctx.attributes.content.path}`;
   const hideBreadcrumbNav = parseHideBreadcrumbNav(ctx.attributes.content.md);
+
+  function extractYAMLFrontMatter(markdown: string): string | null  {
+    const match = markdown.match(/^---\n([\s\S]+?)\n---/);
+    if (match) {
+      return match[1];
+    }
+    return null;
+  }
+  
+  const yamlContent = extractYAMLFrontMatter(ctx.attributes.content.md);  
+  const regex = /^contributors:\s*([\s\S]+?)\n(?=\S|$)/m;
+  const match = yamlContent.match(regex);
+  let contributorsArray = [];
+  
+  if (match) {
+    contributorsArray = match[1]
+      .split('\n')
+      .map(link => link.replace(/^- /, '').trim())
+      .filter(link => link.length > 0);
+  }
+  
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav);
+  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav , contributorsArray);
 }
