@@ -21,6 +21,10 @@ import md2markup from './md2markup.js';
 // http://localhost:3000/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=main/src/pages
 // https://53444-842orangechinchilla.adobeioruntime.net/api/v1/web/md2markup/main/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=/main/src/pages
 
+function isDevMode() {
+
+}
+
 function getUrlExtension(url) {
   let extension;
   if (url.split('.').length > 1) {
@@ -54,22 +58,22 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let devsitePaths;
   let devsitePathsUrl;
   // retrieve the devsitepaths.json file based on if authorization is present
-  if(req.headers.get('authorization')) {
+  if (req.headers.get('authorization')) {
     devsitePathsUrl = `https://main--adp-devsite-stage--adobedocs.aem.live/franklin_assets/devsitepaths.json`;
   } else {
     devsitePathsUrl = `https://main--adp-devsite--adobedocs.aem.live/franklin_assets/devsitepaths.json`;
   }
 
   await fetch(devsitePathsUrl)
-  .then(function(response) {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error('Unable to fetch ${}');
-    }
-  }).then(function(data) {
-    devsitePaths = data?.data;
-  });
+    .then(function (response) {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error('Unable to fetch ${}');
+      }
+    }).then(function (data) {
+      devsitePaths = data?.data;
+    });
 
   // find match based on level 3, 2, or 1 transclusion rule
   // if match found in higher level don't do lower level
@@ -116,8 +120,8 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     ctx.attributes.content.repo = devsitePathMatch.repo;
     ctx.attributes.content.pathprefix = devsitePathMatch.pathPrefix;
 
-    console.log(`branchHeader: ${branchHeader}`); 
-    if(branchHeader) {
+    console.log(`branchHeader: ${branchHeader}`);
+    if (branchHeader) {
       ctx.attributes.content.branch = branchHeader;
     } else {
       ctx.attributes.content.branch = 'main';
@@ -158,7 +162,11 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   // TODO: need to determine which branch we want to pull from based on url
   // default to main
-  const gitUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${path}`;
+  const hostname = new URL(req.url).hostname;
+  const origin = ['127.0.0.1', 'localhost'].includes(hostname)
+    ? 'http://127.0.0.1:3002'
+    : 'https://raw.githubusercontent.com';
+  const gitUrl = `${origin}/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${path}`;
   console.log(`gitUrl: ${gitUrl}`);
   const res = await fetch(gitUrl);
   if (!res.ok) {
@@ -208,18 +216,18 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   const resolvePath = (relativePath, currentDirectory) => {
     const baseDir = currentDirectory.substring(0, currentDirectory.lastIndexOf('/'));
-  
+
     if (relativePath.startsWith('../')) {
       return baseDir.substring(0, baseDir.lastIndexOf('/')) + relativePath.slice(2);
     }
-  
+
     if (relativePath.startsWith('./')) {
       return baseDir + relativePath.slice(1);
     }
-  
+
     return baseDir + '/' + relativePath;
   };
-  
+
   const fetchData = async (url) => {
     const response = await fetch(url);
     if (!response.ok) {
@@ -228,20 +236,20 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     const text = await response.text();
     return text.replace(/^---[\s\S]*?---\s*/g, '').trim();
   };
-  
+
   const replaceComponentWithFragment = async (content, componentName, pathName) => {
-  
+
     if (pathName.endsWith('md')) {
       const resolvedPath = resolvePath(pathName, path);
       const rawUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${resolvedPath}`;
-  
+
       try {
         const fragment = await fetchData(rawUrl);
-  
+
         if (!fragment) {
           return content;
         }
-  
+
         const componentTag = `<${componentName}\\s*/?>`;
         return content.replace(new RegExp(componentTag, 'g'), fragment);
       } catch (error) {
@@ -253,22 +261,22 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
       return content;
     }
   };
-  
+
   const extractImportPaths = (content) => {
     return [...content.matchAll(/import\s+(\w+)\s+from\s+'([^']+)'/g)].map(match => ({
       componentName: match[1],
       pathName: match[2]
     }));
   };
-  
-    const importPaths = extractImportPaths(content);
-    let updatedContent = content;
-  
-    for (const { componentName, pathName } of importPaths) {
-      updatedContent = await replaceComponentWithFragment(updatedContent, componentName, pathName);
-    }
-  
-    ctx.attributes.content.md = updatedContent;
+
+  const importPaths = extractImportPaths(content);
+  let updatedContent = content;
+
+  for (const { componentName, pathName } of importPaths) {
+    updatedContent = await replaceComponentWithFragment(updatedContent, componentName, pathName);
+  }
+
+  ctx.attributes.content.md = updatedContent;
 
   // ctx.attributes.content.topNavContent = await topNavRes.text();
   // ctx.attributes.content.sideNavContent = await sideNavRes.text();
