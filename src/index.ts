@@ -164,7 +164,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // default to main
   const hostname = new URL(req.url).hostname;
   const origin = ['127.0.0.1', 'localhost'].includes(hostname)
-    ? 'http://127.0.0.1:3002'
+    ? 'http://127.0.0.1:3003'
     : 'https://raw.githubusercontent.com';
   const gitUrl = `${origin}/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${path}`;
   console.log(`gitUrl: ${gitUrl}`);
