@@ -128,7 +128,13 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       function processAttributes(attributes: any[]): Record<string, string> {
         return (attributes || []).reduce((acc: Record<string, string>, attr: any) => {
           if (attr?.name) {
-            acc[attr.name] = getAttributeValue(attr, '');
+            let value = getAttributeValue(attr, '');
+            if (attr.name === 'icon') {
+              const buildImagePath = resolve(ctx, value, 'img');
+              acc[attr.name] = buildImagePath;
+            } else {
+              acc[attr.name] = value;
+            }
           }
           return acc;
         }, {});
