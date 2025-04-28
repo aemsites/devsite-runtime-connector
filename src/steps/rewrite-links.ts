@@ -29,8 +29,7 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
 
   // TODO clean up this logic - it's all over the place and not clear what it's doing
   // - enforce strict trailing slashes when they apply (when it's the index.md file)
-
-  if (!pathOrUrl.startsWith('./') && !pathOrUrl.startsWith('../') && !pathOrUrl.startsWith('/')) {
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")){
     return pathOrUrl;
   }
 
@@ -38,13 +37,15 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     return pathOrUrl;
   }
 
-  log.debug('rewrite')
+  log.debug('rewrite pathOrUrl ' + pathOrUrl);
   const cwd = docPath.split('/').slice(0, -1).join('/');
   let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
 
   const projectRoot = '/src/pages/';
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
-  console.log(`resolved:  ${resolved}`)
+  console.log('pathprefix' + pathprefix);
+  console.log(`relativePath:  ${relativePath}`);
+  console.log(`resolved:  ${resolved}`);
   if (resolved.endsWith('.md') || resolved.includes(".md#")) {
     // resolved = resolved.slice(0, -3);
     resolved = `${pathprefix}/${relativePath}`;
@@ -65,10 +66,10 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   console.log(`resolved: ${path.resolve(resolved)}`)
 
   if(resolved === path.resolve(root)) {
-    resolved = `${pathprefix}`; 
+    resolved = `${pathprefix}`;
   } else if (resolved.startsWith(root)) {
     resolved = resolved.substring(root.length);
-  } 
+  }
 
   log.debug(`resolved final: ${resolved}`);
   return resolved;
