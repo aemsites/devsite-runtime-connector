@@ -27,9 +27,8 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     pathprefix
   } = ctx.attributes.content;
 
-  // TODO clean up this logic - it's all over the place and not clear what it's doing
-  // - enforce strict trailing slashes when they apply (when it's the index.md file)
-  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")){
+  // do not rewrite the links if it's an external link or an anchor link.
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://") || pathOrUrl.startsWith("#")){
     return pathOrUrl;
   }
 
