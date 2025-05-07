@@ -71,6 +71,23 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       continue;
     }
 
+    // handle raw <hr /> conversion
+    if (node.name === 'hr') {
+      const hrWrapper = {
+        type: 'mdxJsxFlowElement',
+        name: 'div',
+        attributes: [{ type: 'mdxJsxAttribute', name: 'class', value: 'hr' }],
+        children: [
+          {
+            type: 'thematicBreak',
+          },
+        ],
+      } as unknown as RootContent;
+
+      mdast.children.splice(i, 1, hrWrapper);
+      continue;
+    }
+
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
     const slotsValue = getAttributeValue(slotsAttr, '');
@@ -123,23 +140,6 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
         }
         return val;
       });
-    }
-
-    // handle raw <hr /> conversion
-    if (node.name === 'hr') {
-      const hrWrapper = {
-        type: 'mdxJsxFlowElement',
-        name: 'div',
-        attributes: [{ type: 'mdxJsxAttribute', name: 'class', value: 'hr' }],
-        children: [
-          {
-            type: 'thematicBreak',
-          },
-        ],
-      } as unknown as RootContent;
-
-      mdast.children.splice(i, 1, hrWrapper);
-      continue;
     }
 
     const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
