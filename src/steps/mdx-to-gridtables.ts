@@ -65,8 +65,26 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
   // for loop since we mutate in the loop
   for (let i = 0; i < mdast.children.length; i += 1) {
     const node = mdast.children[i];
+
     if (node.type !== 'mdxJsxFlowElement') {
       // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    // handle raw <hr /> conversion
+    if (node.name === 'hr') {
+      const hrWrapper = {
+        type: 'mdxJsxFlowElement',
+        name: 'div',
+        attributes: [{ type: 'mdxJsxAttribute', name: 'class', value: 'hr' }],
+        children: [
+          {
+            type: 'thematicBreak',
+          },
+        ],
+      } as unknown as RootContent;
+
+      mdast.children.splice(i, 1, hrWrapper);
       continue;
     }
 
