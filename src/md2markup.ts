@@ -40,6 +40,9 @@ export default function md2markup(ctx: Helix.UniversalContext) {
   removeMdxVars(ctx);
   wrapTableBlocks(ctx);
   mdxToGridtables(ctx); // must come before splitSections
+  console.log('~~~~~~~~~ 3 start');
+  console.log(ctx.attributes.content.mdast);
+  console.log('~~~~~~~~~ 3 end');
   splitSections(ctx);
   toHast(ctx);
   rewriteLinks(ctx);

@@ -71,6 +71,10 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       continue;
     }
 
+    console.log('~~~~~~~~~ 0 start');
+    console.log(mdast);
+    console.log('~~~~~~~~~ 0 end');
+
     // handle raw <hr /> conversion
     if (node.name === 'hr') {
       const hrWrapper = {
@@ -87,6 +91,10 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       mdast.children.splice(i, 1, hrWrapper);
       continue;
     }
+
+    console.log('~~~~~~~~~ 1 start');
+    console.log(mdast);
+    console.log('~~~~~~~~~ 1 end');
 
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
@@ -143,6 +151,10 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     }
 
     const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
+
+    console.log('~~~~~~~~~ 2 start');
+    console.log(mdast);
+    console.log('~~~~~~~~~ 2 end');
 
     mdast.children.splice(i, 1 + totalSlots, {
       type: 'gridTable',
