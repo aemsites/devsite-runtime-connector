@@ -74,9 +74,8 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     // handle raw <hr /> conversion
     if (node.name === 'hr') {
       const hrWrapper = {
-        type: 'mdxJsxFlowElement',
+        type: 'hr',
         name: 'div',
-        attributes: [{ type: 'mdxJsxAttribute', name: 'class', value: 'hr' }],
         children: [
           {
             type: 'thematicBreak',
