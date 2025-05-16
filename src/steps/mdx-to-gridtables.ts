@@ -73,17 +73,17 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     // handle raw <hr /> conversion
     if (node.name === 'hr') {
-      const hrWrapper = {
-        type: 'hr',
-        name: 'div',
+      const wrapperNode = {
+        type: 'div',
         children: [
           {
-            type: 'thematicBreak',
+            type: 'text',
+            value: 'hr-wrapper'
           },
         ],
       } as unknown as RootContent;
 
-      mdast.children.splice(i, 1, hrWrapper);
+      mdast.children.splice(i, 1, wrapperNode);
       continue;
     }
 
