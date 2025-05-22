@@ -71,29 +71,18 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       continue;
     }
 
-    // handle raw <hr /> conversion
-    if (node.name === 'hr') {
-      const wrapperNode = {
-        type: 'div',
-        children: [
-          {
-            type: 'text',
-            value: 'hr-wrapper'
-          },
-        ],
-      } as unknown as RootContent;
+    const blockName = node.name;
 
-      mdast.children.splice(i, 1, wrapperNode);
-      continue;
-    }
+    // If HorizontalLine, force slotsValue to 'none'
+    const isHorizontalLine = blockName === 'HorizontalLine';
 
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
-    const slotsValue = getAttributeValue(slotsAttr, '');
-    // if (!slotsValue) {
-    //   // TODO: throw error for invalid document
-    //   break;
-    // }
+    let slotsValue = getAttributeValue(slotsAttr, '');
+    if (isHorizontalLine) {
+      slotsValue = 'none';
+    }
+
     const slots = slotsValue.split(',');
 
     // repeat the block N times if repeat="N" is set
@@ -103,9 +92,6 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     // get variants as string
     const variantAttr = getAttribute(node, 'variant');
     const variants = getAttributeValue(variantAttr, '');
-
-    // block name is the JSX nodename
-    const blockName = node.name;
 
     // Process attributes into individual rows
     const attributeRows = (node.attributes || [])
@@ -125,7 +111,9 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       ],
     }));
 
-    const totalSlots = repeat * slots.length;
+    // Determine how many children to treat as slots
+    const totalSlots = slotsValue === 'none' ? 0 : repeat * slots.length;
+
     let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalSlots);
 
     if (node.name === 'Embed') { // This is for embedding local videos
@@ -141,15 +129,19 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       });
     }
 
-    const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
+    // No need to process slots if slotsValue is "none"
+    let rowsToInsert: RootContent[] = [];
+    if (slotsValue !== 'none') {
+      rowsToInsert = listToMatrix(slotsToInsert, slots.length);
+    }
 
-    mdast.children.splice(i, 1 + totalSlots, {
+    // Build the gridTable node
+    const gridTableNode: RootContent = {
       type: 'gridTable',
       children: [
         {
           type: 'gtBody',
           children: [
-            // Add block name as a header row
             makeGridTableRow([{
               type: 'paragraph',
               children: [
@@ -171,6 +163,13 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
           ],
         },
       ],
-    } as unknown as RootContent);
+    } as unknown as RootContent;
+
+    // Replace only the JSX node if no slots are used
+    if (slotsValue === 'none') {
+      mdast.children.splice(i, 1, gridTableNode);
+    } else {
+      mdast.children.splice(i, 1 + totalSlots, gridTableNode);
+    }
   }
 }
