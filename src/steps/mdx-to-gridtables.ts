@@ -78,12 +78,8 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
-    let slotsValue = getAttributeValue(slotsAttr, '');
-    if (isHorizontalLine) {
-      slotsValue = 'none';
-    }
-
-    const slots = slotsValue.split(',');
+    const slotsValue = getAttributeValue(slotsAttr, '');
+    const slots = slotsValue.split(',').filter(Boolean);
 
     // repeat the block N times if repeat="N" is set
     const repeatAttr = getAttribute(node, 'repeat');
@@ -111,12 +107,12 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       ],
     }));
 
-    // Determine how many children to treat as slots
-    const totalSlots = slotsValue === 'none' ? 0 : repeat * slots.length;
+    // If it's a HorizontalLine, override slot count to 0 (preserve following children)
+    const totalSlots = isHorizontalLine ? 0 : repeat * slots.length;
 
     let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalSlots);
 
-    if (node.name === 'Embed') { // This is for embedding local videos
+    if (blockName === 'Embed') { // This is for embedding local videos
       slotsToInsert = slotsToInsert.map((val) => {
         const valWithChildren = val as { children: Array<any> };
         if (valWithChildren.children) {
@@ -129,11 +125,8 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       });
     }
 
-    // No need to process slots if slotsValue is "none"
-    let rowsToInsert: RootContent[] = [];
-    if (slotsValue !== 'none') {
-      rowsToInsert = listToMatrix(slotsToInsert, slots.length);
-    }
+    // Calculate rows to insert based on total slots
+    const rowsToInsert = totalSlots > 0 ? listToMatrix(slotsToInsert, slots.length) : [];
 
     // Build the gridTable node
     const gridTableNode: RootContent = {
@@ -165,8 +158,8 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       ],
     } as unknown as RootContent;
 
-    // Replace only the JSX node if no slots are used
-    if (slotsValue === 'none') {
+    // Replace the JSX node with the gridTable node
+    if (totalSlots === 0) {
       mdast.children.splice(i, 1, gridTableNode);
     } else {
       mdast.children.splice(i, 1 + totalSlots, gridTableNode);
