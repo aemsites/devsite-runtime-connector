@@ -130,7 +130,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
 
-    mdast.children.splice( i, isHorizontalLine ? 1 : 1 + totalSlots, {
+    mdast.children.splice( i,  1 + totalSlots, {
       type: 'gridTable',
       children: [
         {
