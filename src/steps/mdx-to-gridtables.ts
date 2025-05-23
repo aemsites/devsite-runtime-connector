@@ -79,7 +79,11 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
     const slotsValue = getAttributeValue(slotsAttr, '');
-    const slots = slotsValue.split(',').filter(Boolean);
+    // if (!slotsValue) {
+    //   // TODO: throw error for invalid document
+    //   break;
+    // }
+    const slots = isHorizontalLine ? [] : slotsValue.split(',').filter(Boolean);
 
     // repeat the block N times if repeat="N" is set
     const repeatAttr = getAttribute(node, 'repeat');
@@ -107,9 +111,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       ],
     }));
 
-    // If it's a HorizontalLine, override slot count to 0 (preserve following children)
-    const totalSlots = isHorizontalLine ? 0 : repeat * slots.length;
-
+    const totalSlots = repeat * slots.length;
     let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalSlots);
 
     if (blockName === 'Embed') { // This is for embedding local videos
@@ -126,7 +128,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     }
 
     // Calculate rows to insert based on total slots
-    const rowsToInsert = totalSlots > 0 ? listToMatrix(slotsToInsert, slots.length) : [];
+    const rowsToInsert = isHorizontalLine ? [] : listToMatrix(slotsToInsert, slots.length);
 
     // Build the gridTable node
     const gridTableNode: RootContent = {
@@ -135,6 +137,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
         {
           type: 'gtBody',
           children: [
+            // Add block name as a header row
             makeGridTableRow([{
               type: 'paragraph',
               children: [
@@ -159,7 +162,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     } as unknown as RootContent;
 
     // Replace the JSX node with the gridTable node
-    if (totalSlots === 0) {
+    if (isHorizontalLine) {
       mdast.children.splice(i, 1, gridTableNode);
     } else {
       mdast.children.splice(i, 1 + totalSlots, gridTableNode);
