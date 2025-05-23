@@ -71,21 +71,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       continue;
     }
 
-    // handle raw <hr /> conversion
-    if (node.name === 'hr') {
-      const wrapperNode = {
-        type: 'div',
-        children: [
-          {
-            type: 'text',
-            value: 'hr-wrapper'
-          },
-        ],
-      } as unknown as RootContent;
-
-      mdast.children.splice(i, 1, wrapperNode);
-      continue;
-    }
+    const isHorizontalLine = node.name === 'HorizontalLine';
 
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
@@ -94,7 +80,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     //   // TODO: throw error for invalid document
     //   break;
     // }
-    const slots = slotsValue.split(',');
+    const slots = isHorizontalLine ? [] : slotsValue.split(',');
 
     // repeat the block N times if repeat="N" is set
     const repeatAttr = getAttribute(node, 'repeat');
