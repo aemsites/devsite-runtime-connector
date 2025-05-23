@@ -71,10 +71,8 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       continue;
     }
 
-    const blockName = node.name;
-
     // If HorizontalLine, force slotsValue to 'none'
-    const isHorizontalLine = blockName === 'HorizontalLine';
+    const isHorizontalLine = node.name === 'HorizontalLine';
 
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
@@ -92,6 +90,9 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     // get variants as string
     const variantAttr = getAttribute(node, 'variant');
     const variants = getAttributeValue(variantAttr, '');
+
+    // block name is the JSX nodename
+    const blockName = node.name;
 
     // Process attributes into individual rows
     const attributeRows = (node.attributes || [])
@@ -114,7 +115,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     const totalSlots = repeat * slots.length;
     let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalSlots);
 
-    if (blockName === 'Embed') { // This is for embedding local videos
+    if (node.name === 'Embed') { // This is for embedding local videos
       slotsToInsert = slotsToInsert.map((val) => {
         const valWithChildren = val as { children: Array<any> };
         if (valWithChildren.children) {
@@ -127,11 +128,9 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       });
     }
 
-    // Calculate rows to insert based on total slots
-    const rowsToInsert = isHorizontalLine ? [] : listToMatrix(slotsToInsert, slots.length);
+    const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
 
-    // Build the gridTable node
-    const gridTableNode: RootContent = {
+    mdast.children.splice( i, isHorizontalLine ? 1 : 1 + totalSlots, {
       type: 'gridTable',
       children: [
         {
@@ -159,13 +158,6 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
           ],
         },
       ],
-    } as unknown as RootContent;
-
-    // Replace the JSX node with the gridTable node
-    if (isHorizontalLine) {
-      mdast.children.splice(i, 1, gridTableNode);
-    } else {
-      mdast.children.splice(i, 1 + totalSlots, gridTableNode);
-    }
+    } as unknown as RootContent);
   }
 }
