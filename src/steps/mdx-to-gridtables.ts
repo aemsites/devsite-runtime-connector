@@ -71,7 +71,6 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       continue;
     }
 
-    // If HorizontalLine, force slotsValue to 'none'
     const isHorizontalLine = node.name === 'HorizontalLine';
 
     // get slots
@@ -81,7 +80,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     //   // TODO: throw error for invalid document
     //   break;
     // }
-    const slots = isHorizontalLine ? [] : slotsValue.split(',').filter(Boolean);
+    const slots = isHorizontalLine ? [] : slotsValue.split(',');
 
     // repeat the block N times if repeat="N" is set
     const repeatAttr = getAttribute(node, 'repeat');
@@ -130,7 +129,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     const rowsToInsert = listToMatrix(slotsToInsert, slots.length);
 
-    mdast.children.splice( i,  1 + totalSlots, {
+    mdast.children.splice( i, 1 + totalSlots, {
       type: 'gridTable',
       children: [
         {
