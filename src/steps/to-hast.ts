@@ -30,7 +30,8 @@ const customHandlers = {
 
     // Parse the 'meta' string into a properties object.
     // This handles setting attributes e.g. <pre data-line="1-2, 5, 9-20"><code>
-    const keyValuePairs = Array.from(node.meta.matchAll(/(\S*)(\s*=\s*")(.*?)(")/g), (match) => [match[1], match[3]]);
+    const meta = node.meta ?? '';
+    const keyValuePairs = Array.from(meta.matchAll(/(\S*)(\s*=\s*")(.*?)(")/g), (match) => [match[1], match[3]]);
     const metaProperties = Object.fromEntries(keyValuePairs);
 
     if (pre && pre.type === 'element' && pre.tagName === 'pre') {
