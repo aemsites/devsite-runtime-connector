@@ -40,14 +40,11 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   
   const projectRoot = '/src/pages/';
   let resolved;
-  let isAbsolutePath = false;
-  let absolutePath;
 
   // Handle paths explicitly starting with /src/pages/
   if (pathOrUrl.startsWith('/src/pages/')) {
-    absolutePath = pathOrUrl.replace(/^\/src\/pages\//,'');
-    resolved = path.join(projectRoot, absolutePath);
-    isAbsolutePath = true;
+    const cleanPath = pathOrUrl.replace(/^\/src\/pages\//,'');
+    resolved = path.join(projectRoot, cleanPath);
   } else {
     const cwd = docPath.split('/').slice(0, -1).join('/');
     resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
@@ -58,7 +55,7 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   console.log(`relativePath:  ${relativePath}`);
   console.log(`resolved:  ${resolved}`);
   if (resolved.endsWith('.md') || resolved.includes(".md#")) {
-    resolved = isAbsolutePath ? absolutePath : `${pathprefix}/${relativePath}`;
+    resolved = `${pathprefix}/${relativePath}`;
   } else if (type === 'img') {
     // use this image URL
     const imageURL = `${projectRoot}${relativePath}`;
