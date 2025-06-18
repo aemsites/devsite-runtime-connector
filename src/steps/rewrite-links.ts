@@ -28,7 +28,7 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   } = ctx.attributes.content;
 
   // do not rewrite the links if it's an external link or an anchor link.
-  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://") || pathOrUrl.startsWith("#")){
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://") || pathOrUrl.startsWith("#") || pathOrUrl.startsWith("mailto:")){
     return pathOrUrl;
   }
 
