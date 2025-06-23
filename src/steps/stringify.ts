@@ -20,13 +20,18 @@ function wrapHtml(
   githubBlobPath: string,
   isDocumentationMode: boolean,
   hideBreadcrumbNav?: string,
+  title?: string,
+  description?: string,
+  searchKeywords? : string,
 ): string {
   const documentationString = '<meta name="template" content="documentation">';
   return `\
 <!DOCTYPE html>
 <html>
   <head>
-    <title></title>
+    <title>${title}</title>
+    ${description ? `<meta name="description" content="${description}">` : ''}
+    ${searchKeywords ? `<meta name="keywords" content="${searchKeywords}">` : ''}
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="source" content="github">
     <meta name="pathprefix" content="${pathprefix}">
@@ -54,20 +59,39 @@ function parseFrontMatter(md: string) {
   return md.substring(startIndex, endIndex + tag.length - startIndex);
 }
 
-function parseHideBreadcrumbNav(md: string) {
+function parseVariable(md: string, keyword) {
   const frontMatter = parseFrontMatter(md);
   const lines = frontMatter.split('\n');
-  const line = lines.find((l) => l.trim().startsWith('hideBreadcrumbNav:'));
+  const line = lines.find((l) => l.trim().startsWith(keyword));
+  console.log("parseVariable " + keyword + "line" + line);
+  let variable: string = '';
 
-  let hideBreadcrumbNav: string | null = null;
   if (line) {
     const tokens = line.split(':');
     if (tokens.length === 2) {
-      hideBreadcrumbNav = tokens[1].trim();
+      const value = tokens[1].trim();
+      
+      // Handle YAML array for keywords
+      if (value === '' && keyword === 'keywords:') {
+        const startIndex = lines.indexOf(line);
+        const keywordLines = lines
+          .slice(startIndex + 1)
+          .map(l => l.trim())
+          .filter(l => l.startsWith('-'))
+          .map(l => l.substring(1).trim())
+          .filter(l => l.length > 0);
+        
+        if (keywordLines.length > 0) {
+          variable = keywordLines.join(', ');
+          console.log('Parsed keywords:', variable);
+        }
+      } else {
+        variable = value;
+      }
     }
   }
 
-  return hideBreadcrumbNav;
+  return variable;
 }
 
 export default function stringify(ctx: Helix.UniversalContext) {
@@ -81,8 +105,11 @@ export default function stringify(ctx: Helix.UniversalContext) {
   const documetationMode = ctx.attributes.content.path !== '/src/pages/index.md';
   const { pathprefix } = ctx.attributes.content;
   const githubBlobPath = `https://github.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/blob/${ctx.attributes.content.branch}${ctx.attributes.content.path}`;
-  const hideBreadcrumbNav = parseHideBreadcrumbNav(ctx.attributes.content.md);
+  const hideBreadcrumbNav = parseVariable(ctx.attributes.content.md, "hideBreadcrumbNav:");
+  const docTitle = parseVariable(ctx.attributes.content.md, "title:");
+  const docDescription = parseVariable(ctx.attributes.content.md, "description:");
+  const searchKeywords = parseVariable(ctx.attributes.content.md, "keywords:");
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav);
+  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav, docTitle, docDescription, searchKeywords);
 }
