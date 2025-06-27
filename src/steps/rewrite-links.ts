@@ -37,10 +37,19 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   }
 
   log.debug('rewrite pathOrUrl ' + pathOrUrl);
-  const cwd = docPath.split('/').slice(0, -1).join('/');
-  let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
 
+  let resolved: string;
   const projectRoot = '/src/pages/';
+
+  // Handle absolute paths (starting with /) as relative to /src/pages/
+  if (pathOrUrl.startsWith('/')) {
+    resolved = path.resolve(projectRoot, pathOrUrl.substring(1));
+  } else {
+    // Handle relative paths
+    const cwd = docPath.split('/').slice(0, -1).join('/');
+    resolved = path.resolve(cwd, pathOrUrl);
+  }
+
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
   console.log('pathprefix' + pathprefix);
   console.log(`relativePath:  ${relativePath}`);
