@@ -37,16 +37,24 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   }
 
   log.debug('rewrite pathOrUrl ' + pathOrUrl);
-  const cwd = docPath.split('/').slice(0, -1).join('/');
-  let resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
-
+  
   const projectRoot = '/src/pages/';
+  let resolved;
+
+  // Handle paths explicitly starting with /src/pages/
+  if (pathOrUrl.startsWith('/src/pages/')) {
+    const cleanPath = pathOrUrl.replace(/^\/src\/pages\//,'');
+    resolved = path.join(projectRoot, cleanPath);
+  } else {
+    const cwd = docPath.split('/').slice(0, -1).join('/');
+    resolved = path.resolve(cwd, pathOrUrl.startsWith('/') ? `.${pathOrUrl}` : pathOrUrl);
+  }
+
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
   console.log('pathprefix' + pathprefix);
   console.log(`relativePath:  ${relativePath}`);
   console.log(`resolved:  ${resolved}`);
   if (resolved.endsWith('.md') || resolved.includes(".md#")) {
-    // resolved = resolved.slice(0, -3);
     resolved = `${pathprefix}/${relativePath}`;
   } else if (type === 'img') {
     // use this image URL
