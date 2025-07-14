@@ -158,9 +158,22 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   // TODO: need to determine which branch we want to pull from based on url
   // default to main
-  const gitUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${path}`;
-  console.log(`gitUrl: ${gitUrl}`);
-  const res = await fetch(gitUrl);
+  const hostname = new URL(req.url).hostname;
+  const origin = ['127.0.0.1', 'localhost'].includes(hostname)
+    ? 'http://127.0.0.1:3003'
+    : 'https://raw.githubusercontent.com';
+
+  let contentUrl;
+
+  // check to see if we're in local devmode or if content is coming from github
+  if(origin === 'http://127.0.0.1:3003') {
+    let flatPath = path.replace('/src/pages', '');
+    contentUrl = `${origin}${flatPath}`;
+  } else {
+    contentUrl = `${origin}/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${path}`;
+  }
+  console.log(`contentUrl: ${contentUrl}`);
+  const res = await fetch(contentUrl);
   if (!res.ok) {
     const status = res.status < 500 ? res.status : 500;
     return new Response('', {

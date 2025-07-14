@@ -70,7 +70,7 @@
     "lint": "eslint .",
     "build": "rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "bundle": "aio app build",
-    "dev": "nodemon -w src -w test -e js,ts,cjs,mjs --exec 'node --loader ts-node/esm --no-warnings test/dev/server.ts'",
+    "dev": "nodemon -w src -w test -e js,ts,cjs,mjs --exec 'WEBSERVER_PORT=3002 node --loader ts-node/esm --no-warnings test/dev/server.ts'",
     "test": "TS_NODE_PROJECT='./tsconfig.json' c8 mocha",
     "deploy": "dotenv -- aio app deploy",
     "prepare": "husky install"
