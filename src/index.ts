@@ -244,8 +244,9 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   
     //credential jsonDefinition url update
     function updateCredentialTag(content: string, currentFilePath: string): string {
-      return content.replace(/<GetCredential[^>]*jsonDefinition="([^"]+)"[^>]*\/>/g, (_, oldPath: string) => {
-        return `<GetCredential jsonDefinition="${resolvePath(oldPath, currentFilePath)}"/>`;
+      return content.replace(/(<GetCredential[^>]*jsonDefinition=")([^"]+)("[^>]*\/>)/g, (match, before, oldPath, after) => {
+        const newPath = resolvePath(oldPath, currentFilePath);
+        return `${before}${newPath}${after}`;
       });
     }
     const importPaths = extractImportPaths(content);
