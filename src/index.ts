@@ -261,14 +261,23 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     }));
   };
   
+    //credential jsonDefinition url update
+    function updateCredentialTag(content: string, currentFilePath: string): string {
+      return content.replace(/(<GetCredential[^>]*jsonDefinition=")([^"]+)("[^>]*\/>)/g, (match, before, oldPath, after) => {
+        const newPath = resolvePath(oldPath, currentFilePath);
+        return `${before}${newPath}${after}`;
+      });
+    }
     const importPaths = extractImportPaths(content);
     let updatedContent = content;
   
     for (const { componentName, pathName } of importPaths) {
       updatedContent = await replaceComponentWithFragment(updatedContent, componentName, pathName);
     }
-  
-    ctx.attributes.content.md = updatedContent;
+    
+    updatedContent = updateCredentialTag(updatedContent, path);
+    
+      ctx.attributes.content.md = updatedContent;
 
   // ctx.attributes.content.topNavContent = await topNavRes.text();
   // ctx.attributes.content.sideNavContent = await sideNavRes.text();
