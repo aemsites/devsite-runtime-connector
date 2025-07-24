@@ -156,15 +156,26 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // ctx.attributes.content.topNavUrl = topNavUrl;
   // ctx.attributes.content.sideNavUrl = sideNavUrl;
 
-  // TODO: need to determine which branch we want to pull from based on url
-  // default to main
+  console.log(`WEBSERVER_PORT ${process.env.WEBSERVER_PORT}`)
   const hostname = new URL(req.url).hostname;
-  const origin = ['127.0.0.1', 'localhost'].includes(hostname)
-    ? 'http://127.0.0.1:3003'
-    : 'https://raw.githubusercontent.com';
+  let origin;
+
+  // set origin of content
+  // local devmode: return content from http://127.0.0.1:3003
+  // local dev: return content from github
+  // normal: return content from github
+  if(['127.0.0.1', 'localhost'].includes(hostname)) {
+    // hacky way of getting the port since it's not in the req.url
+    if(process?.env?.WEBSERVER_PORT && process.env.WEBSERVER_PORT==='3002') {
+      origin = 'http://127.0.0.1:3003'
+    } else {
+      origin = 'https://raw.githubusercontent.com';
+    }
+  } else {
+    origin = 'https://raw.githubusercontent.com';
+  }
 
   let contentUrl;
-
   // check to see if we're in local devmode or if content is coming from github
   if(origin === 'http://127.0.0.1:3003') {
     let flatPath = path.replace('/src/pages', '');

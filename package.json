@@ -72,6 +72,7 @@
     "build": "rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "bundle": "aio app build",
     "dev": "cross-env WEBSERVER_PORT=3002 nodemon -w src -w test -e js,ts,cjs,mjs --exec \"node --loader ts-node/esm --no-warnings test/dev/server.ts\"",
+    "devRemote": "nodemon -w src -w test -e js,ts,cjs,mjs --exec 'node --loader ts-node/esm --no-warnings test/dev/server.ts'",
     "test": "TS_NODE_PROJECT='./tsconfig.json' c8 mocha",
     "deploy": "dotenv -- aio app deploy",
     "prepare": "husky install"
