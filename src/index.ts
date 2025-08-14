@@ -65,10 +65,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     if (response.ok) {
       return response.json();
     } else {
-      throw new Error('Unable to fetch ${}');
+      throw new Error(`Unable to fetch ${devsitePathsUrl}`);
     }
   }).then(function(data) {
     devsitePaths = data?.data;
+  }).catch(function(error) {
+    console.error('Error fetching devsite paths:', error);
+    devsitePaths = [];
   });
 
   // find match based on level 3, 2, or 1 transclusion rule
@@ -308,8 +311,50 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   // log.debug('topNavContent: ', ctx.attributes.content.topNavContent);
   // log.debug('sideNavContent: ', ctx.attributes.content.sideNavContent);
-  const html = md2markup(ctx);
-  log.debug('html: ', html);
+
+  let html;
+  try {
+    html = md2markup(ctx);
+    log.debug('html: ', html);
+  } catch (error) {
+    console.error('Error processing markdown:', error);
+
+    let lineInfo = '';
+    if (error && typeof error.line === 'number') {
+      lineInfo += ` at line ${error.line}`;
+    }
+    if (error && typeof error.column === 'number') {
+      lineInfo += `, column ${error.column}`;
+    }
+    const errorHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Error 500</title>
+        </head>
+        <body>
+          <header></header>
+          <main>
+            <div>
+              <h1>Error 500</h1>
+              <h2>Markdown processing error</h2>
+              <p><strong>Error:</strong> ${error.message || 'Unknown error'}</p>
+              <p><strong>File path:</strong> <a href="https://github.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/blob/${ctx.attributes.content.branch}${ctx.attributes.content.path}">${ctx.attributes.content.path}</a> ${lineInfo} </p>
+              <p>An error occurred while processing the markdown content.</p>
+            </div>
+          </main>
+          <footer></footer>
+        </body>
+      </html>
+    `;
+    return new Response(errorHtml, {
+      status: 500,
+      headers: {
+        'content-type': 'text/html',
+        'x-error': 'Markdown processing error',
+      },
+    });
+  }
 
   return new Response(html, {
     status: 200,
