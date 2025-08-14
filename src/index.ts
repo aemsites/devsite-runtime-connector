@@ -347,8 +347,10 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
         </body>
       </html>
     `;
+
+    // set this to 200 so we can actually show the error page
     return new Response(errorHtml, {
-      status: 500,
+      status: 200,
       headers: {
         'content-type': 'text/html',
         'x-error': 'Markdown processing error',
