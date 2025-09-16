@@ -176,8 +176,11 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
 
   let contentUrl;
+  let localMode = false;
   // check to see if we're in local devmode or if content is coming from github
   if(origin === 'http://127.0.0.1:3003') {
+    console.log('Local mode detected');
+    localMode = true;
     let flatPath = path.replace('/src/pages', '');
     contentUrl = `${origin}${flatPath}`;
   } else {
@@ -229,6 +232,10 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
 
   const content = await res.text();
+
+  if(localMode) {
+    ctx.attributes.content.branch = res.headers.get('local-branch-name');
+  }
 
   const resolvePath = (relativePath, currentDirectory) => {
     const baseDir = currentDirectory.substring(0, currentDirectory.lastIndexOf('/'));
