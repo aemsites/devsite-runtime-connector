@@ -11,7 +11,7 @@
  */
 
 import type { Helix } from '@adobe/helix-universal';
-import { wrap } from '@adobe/helix-shared-wrap';
+import wrap from '@adobe/helix-shared-wrap';
 import { Request, Response } from '@adobe/fetch';
 // eslint-disable-next-line
 import { createAdapter } from '../node_modules/@adobe/helix-universal/src/openwhisk-adapter.js';
