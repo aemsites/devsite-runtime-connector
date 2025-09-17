@@ -31,22 +31,38 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   ctx.attributes ??= {};
   ctx.attributes.content ??= {};
   log.debug('--------------------------------');
+  log.debug(`    WEBSERVER_PORT: ${process.env.WEBSERVER_PORT}`);
   log.debug('ctx.pathInfo:', ctx.pathInfo);
 
   let extension = getUrlExtension(ctx.pathInfo.suffix);
 
-  const suffixSplit = ctx.pathInfo.suffix.split('/');
-  let suffixSplitRest = suffixSplit.slice(1);
-
-  let devsitePathMatch;
-  let devsitePathMatchFlag = false;
-
   log.debug(`    extension: ${extension}`);
 
+  const suffixSplit = ctx.pathInfo.suffix.split('/');
+  const hostname = new URL(req.url).hostname;
+  let suffixSplitRest = suffixSplit.slice(1);
+  let devsitePathMatch;
+  let devsitePathMatchFlag = false;
   let devsitePaths;
   let devsitePathsUrl;
-
   let localMode = false;
+  let origin;
+
+  // set origin of content
+  // local devmode: return content from http://127.0.0.1:3003
+  // local dev: return content from github
+  // normal: return content from github
+  if(['127.0.0.1', 'localhost'].includes(hostname)) {
+    // hacky way of getting the port since it's not in the req.url
+    if(process?.env?.WEBSERVER_PORT && process.env.WEBSERVER_PORT==='3002') {
+      origin = 'http://127.0.0.1:3003'
+    } else {
+      origin = 'https://raw.githubusercontent.com';
+    }
+  } else {
+    origin = 'https://raw.githubusercontent.com';
+  }
+
   // check to see if we're in local devmode or if content is coming from github
   if(origin === 'http://127.0.0.1:3003') {
     log.debug('    Local mode detected');
@@ -54,7 +70,8 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
 
   // retrieve the devsitepaths.json file based on if authorization is present
-  if(req.headers.get('authorization')) {
+  // always retrieve from stage devsitepaths.json when in local mode
+  if(req.headers.get('authorization') || localMode) {
     devsitePathsUrl = `https://main--adp-devsite-stage--adobedocs.aem.live/franklin_assets/devsitepaths.json`;
   } else {
     devsitePathsUrl = `https://main--adp-devsite--adobedocs.aem.live/franklin_assets/devsitepaths.json`;
@@ -141,25 +158,6 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   ctx.attributes.content.path = path;
 
   log.debug(`ctx.attributes.content.path: ${ctx.attributes.content.path}`);
-
-  log.debug(`WEBSERVER_PORT: ${process.env.WEBSERVER_PORT}`);
-  const hostname = new URL(req.url).hostname;
-  let origin;
-
-  // set origin of content
-  // local devmode: return content from http://127.0.0.1:3003
-  // local dev: return content from github
-  // normal: return content from github
-  if(['127.0.0.1', 'localhost'].includes(hostname)) {
-    // hacky way of getting the port since it's not in the req.url
-    if(process?.env?.WEBSERVER_PORT && process.env.WEBSERVER_PORT==='3002') {
-      origin = 'http://127.0.0.1:3003'
-    } else {
-      origin = 'https://raw.githubusercontent.com';
-    }
-  } else {
-    origin = 'https://raw.githubusercontent.com';
-  }
 
   let contentUrl;
   // check to see if we're in local devmode or if content is coming from github

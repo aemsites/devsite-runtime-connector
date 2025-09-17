@@ -36,7 +36,7 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     return pathOrUrl;
   }
 
-  log.debug('rewrite pathOrUrl ' + pathOrUrl);
+  log.debug('    rewrite pathOrUrl ' + pathOrUrl);
 
   let resolved: string;
   const projectRoot = '/src/pages/';
@@ -51,11 +51,7 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   }
 
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
-  // log.debug(`pathprefix: ${pathprefix}`);
-  // log.debug(`relativePath: ${relativePath}`);
-  // log.debug(`resolved: ${resolved}`);
   if (resolved.endsWith('.md') || resolved.includes(".md#")) {
-    // resolved = resolved.slice(0, -3);
     resolved = `${pathprefix}/${relativePath}`;
   } else if (type === 'img') {
     // use this image URL
@@ -63,15 +59,9 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
 
     const fetchImage = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${imageURL}`;
     resolved = fetchImage;
-    log.debug(`resolved start: ${resolved}`);
-    // if (!resolved.startsWith('/')) {
-    //   resolved = resolved.startsWith('./') ? resolved.substring(1) : `/${resolved}`;
-    // }
+    log.debug(`    resolved start: ${resolved}`);
     resolved = `${resolved}`;
   }
-
-  // log.debug(`root: ${path.resolve(root)}`);
-  // log.debug(`resolved: ${path.resolve(resolved)}`);
 
   if(resolved === path.resolve(root)) {
     resolved = `${pathprefix}`;
@@ -79,7 +69,6 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     resolved = resolved.substring(root.length);
   }
 
-  // log.debug(`resolved final: ${resolved}`);
   return resolved;
 }
 
@@ -116,9 +105,7 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
         }
       }
 
-      // log.debug('visit');
       node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
-      // log.debug(`${attr} visited`);
 
     }
     return CONTINUE;
