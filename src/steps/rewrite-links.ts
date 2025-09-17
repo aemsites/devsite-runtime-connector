@@ -51,9 +51,9 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   }
 
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
-  console.log('pathprefix' + pathprefix);
-  console.log(`relativePath:  ${relativePath}`);
-  console.log(`resolved:  ${resolved}`);
+  // log.debug(`pathprefix: ${pathprefix}`);
+  // log.debug(`relativePath: ${relativePath}`);
+  // log.debug(`resolved: ${resolved}`);
   if (resolved.endsWith('.md') || resolved.includes(".md#")) {
     // resolved = resolved.slice(0, -3);
     resolved = `${pathprefix}/${relativePath}`;
@@ -70,8 +70,8 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     resolved = `${resolved}`;
   }
 
-  console.log(`root: ${path.resolve(root)}`)
-  console.log(`resolved: ${path.resolve(resolved)}`)
+  // log.debug(`root: ${path.resolve(root)}`);
+  // log.debug(`resolved: ${path.resolve(resolved)}`);
 
   if(resolved === path.resolve(root)) {
     resolved = `${pathprefix}`;
@@ -79,7 +79,7 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     resolved = resolved.substring(root.length);
   }
 
-  log.debug(`resolved final: ${resolved}`);
+  // log.debug(`resolved final: ${resolved}`);
   return resolved;
 }
 
@@ -116,9 +116,9 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
         }
       }
 
-      log.debug('visit');
+      // log.debug('visit');
       node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
-      log.debug(`${attr} visited`);
+      // log.debug(`${attr} visited`);
 
     }
     return CONTINUE;

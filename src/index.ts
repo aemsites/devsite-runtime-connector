@@ -11,15 +11,11 @@
  */
 
 import type { Helix } from '@adobe/helix-universal';
-import wrap from '@adobe/helix-shared-wrap';
+import { wrap } from '@adobe/helix-shared-wrap';
 import { Request, Response } from '@adobe/fetch';
 // eslint-disable-next-line
 import { createAdapter } from '../node_modules/@adobe/helix-universal/src/openwhisk-adapter.js';
 import md2markup from './md2markup.js';
-
-// test urls
-// http://localhost:3000/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=main/src/pages
-// https://53444-842orangechinchilla.adobeioruntime.net/api/v1/web/md2markup/main/AdobeDocs/commerce-webapi/rest/b2b/company-users.md?root=/main/src/pages
 
 function getUrlExtension(url) {
   let extension;
@@ -34,14 +30,9 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   const { log } = ctx;
   ctx.attributes ??= {};
   ctx.attributes.content ??= {};
-  console.log('ctx.pathInfo', ctx.pathInfo);
+  log.debug('ctx.pathInfo:', ctx.pathInfo);
 
   let extension = getUrlExtension(ctx.pathInfo.suffix);
-
-  // TODO - figure out logic for tacking on md files always add on a trailing slash if no extension found
-  // if(!extension) {
-  //   ctx.pathInfo.suffix += '/';
-  // }
 
   const suffixSplit = ctx.pathInfo.suffix.split('/');
   let suffixSplitRest = suffixSplit.slice(1);
@@ -49,7 +40,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let devsitePathMatch;
   let devsitePathMatchFlag = false;
 
-  console.log(`extension ${extension}`);
+  log.debug(`extension: ${extension}`);
 
   let devsitePaths;
   let devsitePathsUrl;
@@ -67,7 +58,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     } else {
       throw new Error('Unable to fetch ${}');
     }
-  }).then(function(data) {
+  }).then(function(data: any) {
     devsitePaths = data?.data;
   });
 
@@ -77,7 +68,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}/${suffixSplit[3]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
-      console.log('rest 3');
+      log.debug('rest 3');
       suffixSplitRest = suffixSplit.slice(4);
     }
   }
@@ -85,7 +76,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}/${suffixSplit[2]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
-      console.log('rest 2');
+      log.debug('rest 2');
       suffixSplitRest = suffixSplit.slice(3);
     }
   }
@@ -93,7 +84,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === `/${suffixSplit[1]}`);
     devsitePathMatchFlag = !!devsitePathMatch;
     if (devsitePathMatchFlag) {
-      console.log('rest 1');
+      log.debug('rest 1');
       suffixSplitRest = suffixSplit.slice(2);
     }
   }
@@ -103,32 +94,26 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     devsitePathMatch = devsitePaths.find((element) => element.pathPrefix === '/');
   }
 
-  console.log(`devsitePathMatch: ${devsitePathMatch?.pathPrefix}`);
-  console.log(`suffixSplitRest: ${suffixSplitRest}`);
+  log.debug(`devsitePathMatch: ${devsitePathMatch?.pathPrefix}`);
+  log.debug(`suffixSplitRest: ${suffixSplitRest}`);
 
   // pull from specified branch described in the hacky x-content-source-authorization header
   // this allow us to deploy to main--adp-devsite-stage--adobedocs.hlx.page
   let branchHeader = req.headers.get('authorization');
-  console.log(`branchHeader: ${branchHeader}`);
+  log.debug(`branchHeader: ${branchHeader}`);
   // TODO: should this error out if no match is present?
   if (devsitePathMatch) {
     ctx.attributes.content.owner = devsitePathMatch.owner;
     ctx.attributes.content.repo = devsitePathMatch.repo;
     ctx.attributes.content.pathprefix = devsitePathMatch.pathPrefix;
 
-    console.log(`branchHeader: ${branchHeader}`); 
     if(branchHeader) {
       ctx.attributes.content.branch = branchHeader;
     } else {
       ctx.attributes.content.branch = 'main';
     }
-    console.log(`ctx.attributes.content.branch: ${ctx.attributes.content.branch}`);
+    log.debug(`ctx.attributes.content.branch: ${ctx.attributes.content.branch}`);
   }
-
-  // const [_, repo, ...rest] = ctx.pathInfo.suffix.split('/');
-  // if (!repo) {
-  //   return new Response('', { status: 400, headers: { 'x-error': 'repo is required' } });
-  // }
 
   const rootPath = devsitePathMatch?.root;
   let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
@@ -143,20 +128,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     path += '.md';
   }
 
-  // const branch = path.split('/')[1];
-  // const gatsbyConfigUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/eds/out/topNav.html`;
-  // const topNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/topNav.html`;
-  // const sideNavUrl = `https://raw.githubusercontent.com/${owner}/${repo}/preprocess-nav/eds/out/sideNav.html`;
-
   ctx.attributes.content.root = rootPath;
   ctx.attributes.content.path = path;
 
-  console.log(`path: ${path}`);
-  console.log(`ctx.attributes.content.path: ${ctx.attributes.content.path}`);
-  // ctx.attributes.content.topNavUrl = topNavUrl;
-  // ctx.attributes.content.sideNavUrl = sideNavUrl;
+  log.debug(`path: ${path}`);
+  log.debug(`ctx.attributes.content.path: ${ctx.attributes.content.path}`);
 
-  console.log(`WEBSERVER_PORT ${process.env.WEBSERVER_PORT}`)
+  log.debug(`WEBSERVER_PORT: ${process.env.WEBSERVER_PORT}`);
   const hostname = new URL(req.url).hostname;
   let origin;
 
@@ -179,14 +157,14 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   let localMode = false;
   // check to see if we're in local devmode or if content is coming from github
   if(origin === 'http://127.0.0.1:3003') {
-    console.log('Local mode detected');
+    log.debug('Local mode detected');
     localMode = true;
     let flatPath = path.replace('/src/pages', '');
     contentUrl = `${origin}${flatPath}`;
   } else {
     contentUrl = `${origin}/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${path}`;
   }
-  console.log(`contentUrl: ${contentUrl}`);
+  log.debug(`contentUrl: ${contentUrl}`);
   const res = await fetch(contentUrl);
   if (!res.ok) {
     const status = res.status < 500 ? res.status : 500;
@@ -198,29 +176,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     });
   }
 
-  // const topNavRes = await fetch(topNavUrl);
-  // if (!topNavRes.ok) {
-  //   const status = topNavRes.status < 500 ? topNavRes.status : 500;
-  //   return new Response('', {
-  //     status,
-  //     headers: {
-  //       'x-error': `failed to fetch from github (${topNavRes.status})`,
-  //     },
-  //   });
-  // }
-
-  // const sideNavRes = await fetch(sideNavUrl);
-  // if (!sideNavRes.ok) {
-  //   const status = sideNavRes.status < 500 ? sideNavRes.status : 500;
-  //   return new Response('', {
-  //     status,
-  //     headers: {
-  //       'x-error': `failed to fetch from github (${sideNavRes.status})`,
-  //     },
-  //   });
-  // }
-
-  log.debug('file name: ', ctx.attributes);
+  // log.debug('file name: ', ctx.attributes);
   if (!path.endsWith('.md')) {
     // dont convert non-markdown content
     return new Response(await res.arrayBuffer(), {
@@ -276,11 +232,11 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
         const componentTag = `<${componentName}\\s*/?>`;
         return content.replace(new RegExp(componentTag, 'g'), fragment);
       } catch (error) {
-        console.error('Error fetching data for', pathName, error);
+        log.error('Error fetching data for', pathName, error);
         return content;
       }
     } else {
-      console.log('Handling non-md path:', pathName);
+      log.debug('Handling non-md path:', pathName);
       return content;
     }
   };
@@ -316,7 +272,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   // log.debug('topNavContent: ', ctx.attributes.content.topNavContent);
   // log.debug('sideNavContent: ', ctx.attributes.content.sideNavContent);
   const html = md2markup(ctx);
-  log.debug('html: ', html);
+  // log.debug('html: ', html);
 
   return new Response(html, {
     status: 200,
