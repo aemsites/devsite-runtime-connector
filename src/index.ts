@@ -45,6 +45,14 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   let devsitePaths;
   let devsitePathsUrl;
+
+  let localMode = false;
+  // check to see if we're in local devmode or if content is coming from github
+  if(origin === 'http://127.0.0.1:3003') {
+    log.debug('    Local mode detected');
+    localMode = true;
+  }
+
   // retrieve the devsitepaths.json file based on if authorization is present
   if(req.headers.get('authorization')) {
     devsitePathsUrl = `https://main--adp-devsite-stage--adobedocs.aem.live/franklin_assets/devsitepaths.json`;
@@ -154,11 +162,8 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
 
   let contentUrl;
-  let localMode = false;
   // check to see if we're in local devmode or if content is coming from github
-  if(origin === 'http://127.0.0.1:3003') {
-    log.debug('    Local mode detected');
-    localMode = true;
+  if(localMode) {
     let flatPath = path.replace('/src/pages', '');
     contentUrl = `${origin}${flatPath}`;
   } else {
