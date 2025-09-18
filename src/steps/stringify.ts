@@ -61,11 +61,11 @@ function parseFrontMatter(md: string) {
   return md.substring(startIndex, endIndex + tag.length - startIndex);
 }
 
-function parseVariable(md: string, keyword) {
+function parseVariable(md: string, keyword, log) {
   const frontMatter = parseFrontMatter(md);
   const lines = frontMatter.split('\n');
   const line = lines.find((l) => l.trim().startsWith(keyword));
-  console.log("parseVariable " + keyword + "line" + line);
+  log.debug(`    parseVariable ${keyword} line: ${line}`);
   let variable: string = '';
 
   if (line) {
@@ -85,7 +85,7 @@ function parseVariable(md: string, keyword) {
         
         if (keywordLines.length > 0) {
           variable = keywordLines.join(', ');
-          console.log('Parsed keywords:', variable);
+          log.debug('    Parsed keywords:', variable);
         }
       } else {
         variable = value;
@@ -98,6 +98,8 @@ function parseVariable(md: string, keyword) {
 
 export default function stringify(ctx: Helix.UniversalContext) {
   const { content } = ctx.attributes;
+  const { log } = ctx;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
   rehypeFormat()(content.hast as any);
 
@@ -107,11 +109,11 @@ export default function stringify(ctx: Helix.UniversalContext) {
   const documetationMode = ctx.attributes.content.path !== '/src/pages/index.md';
   const { pathprefix } = ctx.attributes.content;
   const githubBlobPath = `https://github.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/blob/${ctx.attributes.content.branch}${ctx.attributes.content.path}`;
-  const hideBreadcrumbNav = parseVariable(ctx.attributes.content.md, "hideBreadcrumbNav:");
-  const layout = parseVariable(ctx.attributes.content.md, "layout:");
-  const docTitle = parseVariable(ctx.attributes.content.md, "title:");
-  const docDescription = parseVariable(ctx.attributes.content.md, "description:");
-  const searchKeywords = parseVariable(ctx.attributes.content.md, "keywords:");
+  const hideBreadcrumbNav = parseVariable(ctx.attributes.content.md, "hideBreadcrumbNav:", log);
+  const layout = parseVariable(ctx.attributes.content.md, "layout:", log);
+  const docTitle = parseVariable(ctx.attributes.content.md, "title:", log);
+  const docDescription = parseVariable(ctx.attributes.content.md, "description:", log);
+  const searchKeywords = parseVariable(ctx.attributes.content.md, "keywords:", log);
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
   }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav, layout, docTitle, docDescription, searchKeywords);
