@@ -29,39 +29,66 @@ export function code(state: State, node: Code): any {
   const codeAttrs: Record<string, string> = {};
   const codeClasses: string[] = [];
 
+  // Robustly extract attributes and flags for <code>
   const parseMeta = (input: string): Array<{ key: string; value?: string }> => {
-    const regex = /([^\s=]+)(?:=(?:"([^"]*)"|([^\s"]+)))?/g;
     const tokens: Array<{ key: string; value?: string }> = [];
-
-    let match;
-    while ((match = regex.exec(input)) !== null) {
-      const key = match[1];
-      const value = match[2] ?? match[3];
-      tokens.push({ key, value });
+    let i = 0;
+    const n = input.length;
+    while (i < n) {
+      while (i < n && /\s/.test(input[i]!)) i++;
+      if (i >= n) break;
+      const keyStart = i;
+      while (i < n && !/\s|=/.test(input[i]!)) i++;
+      const key = input.slice(keyStart, i);
+      while (i < n && /\s/.test(input[i]!)) i++;
+      let value: string | undefined;
+      if (i < n && input[i] === '=') {
+        i++;
+        while (i < n && /\s/.test(input[i]!)) i++;
+        if (i < n && input[i] === '"') {
+          i++;
+          const valStart = i;
+          while (i < n && input[i] !== '"') i++;
+          value = input.slice(valStart, i);
+          if (i < n && input[i] === '"') i++;
+        } else {
+          const valStart = i;
+          while (i < n && !/\s/.test(input[i]!)) i++;
+          value = input.slice(valStart, i);
+        }
+      }
+      if (key) tokens.push({ key, value });
     }
-
     return tokens;
   };
 
-  // Normalize boolean-like flags so JSX styles like `flag` and `flag={true}` are treated the same
   for (const { key, value } of parseMeta(meta)) {
-    const isBooleanTrue = value === undefined || value === 'true';
-    if ((key === 'disableLineNumbers' || key.startsWith('language-')) && isBooleanTrue) {
+    if (key === 'disableLineNumbers' && value === undefined) {
+      codeClasses.push('disableLineNumbers');
+    } else if (key.startsWith('language-') && value === undefined) {
       codeClasses.push(key);
+    } else if (value !== undefined) {
+      codeAttrs[key] = value;
     } else {
-      codeAttrs[key] = value ?? '';
+      codeAttrs[key] = '';
     }
   }
 
   if (pre?.type === 'element' && pre.tagName === 'pre') {
+    // Add classes and attributes to <code> child only
     const isCodeElement = (n: any): n is Element => n?.type === 'element' && n.tagName === 'code';
     const codeEl = pre.children?.find?.(isCodeElement);
-
     if (codeEl) {
-      if (codeClasses.length) {
-        const existingArray = [].concat(codeEl.properties?.className || []);
-        codeEl.properties.className = [...existingArray, ...codeClasses];
-      }
+      // Merge classes
+      const existing = (codeEl.properties as any).className;
+      const base: Array<string | number> = Array.isArray(existing)
+        ? (existing as any[]).filter((v) => typeof v === 'string' || typeof v === 'number')
+        : typeof existing === 'string' || typeof existing === 'number'
+          ? [existing]
+          : [];
+      const allClasses: Array<string | number> = Array.from(new Set([...base, ...codeClasses]));
+      if (allClasses.length) (codeEl.properties as any).className = allClasses;
+      else delete (codeEl.properties as any).className;
 
       // Merge attributes
       Object.assign(codeEl.properties, codeAttrs);
