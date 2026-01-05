@@ -73,6 +73,9 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     const isHorizontalLine = node.name === 'HorizontalLine';
 
+    const isFragment = node.name === 'Fragment';
+
+
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
     const slotsValue = getAttributeValue(slotsAttr, '');
@@ -84,7 +87,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     // repeat the block N times if repeat="N" is set
     const repeatAttr = getAttribute(node, 'repeat');
-    const repeat = parseInt(getAttributeValue(repeatAttr, '1'), 10);
+    const repeat = isFragment ? 0 : parseInt(getAttributeValue(repeatAttr, '1'), 10);
 
     // get variants as string
     const variantAttr = getAttribute(node, 'variant');
