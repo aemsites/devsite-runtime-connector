@@ -197,18 +197,18 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   const resolvePath = (relativePath, currentDirectory) => {
     const baseDir = currentDirectory.substring(0, currentDirectory.lastIndexOf('/'));
-  
+
     if (relativePath.startsWith('../')) {
       return baseDir.substring(0, baseDir.lastIndexOf('/')) + relativePath.slice(2);
     }
-  
+
     if (relativePath.startsWith('./')) {
       return baseDir + relativePath.slice(1);
     }
-  
+
     return baseDir + '/' + relativePath;
   };
-  
+
   const fetchData = async (url) => {
     const response = await fetch(url);
     if (!response.ok) {
@@ -217,20 +217,20 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     const text = await response.text();
     return text.replace(/^---[\s\S]*?---\s*/g, '').trim();
   };
-  
+
   const replaceComponentWithFragment = async (content, componentName, pathName) => {
-  
+
     if (pathName.endsWith('md')) {
       const resolvedPath = resolvePath(pathName, path);
       const rawUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${resolvedPath}`;
-  
+
       try {
         const fragment = await fetchData(rawUrl);
-  
+
         if (!fragment) {
           return content;
         }
-  
+
         const componentTag = `<${componentName}\\s*/?>`;
         return content.replace(new RegExp(componentTag, 'g'), fragment);
       } catch (error) {
@@ -242,14 +242,14 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
       return content;
     }
   };
-  
+
   const extractImportPaths = (content) => {
     return [...content.matchAll(/import\s+(\w+)\s+from\s+'([^']+)'/g)].map(match => ({
       componentName: match[1],
       pathName: match[2]
     }));
   };
-  
+
     //credential jsonDefinition url update
     function updateCredentialTag(content: string, currentFilePath: string): string {
       return content.replace(/(<GetCredential[^>]*jsonDefinition=")([^"]+)("[^>]*\/>)/g, (match, before, oldPath, after) => {
@@ -259,20 +259,25 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     }
     const importPaths = extractImportPaths(content);
     let updatedContent = content;
-  
+
     for (const { componentName, pathName } of importPaths) {
       updatedContent = await replaceComponentWithFragment(updatedContent, componentName, pathName);
     }
-    
+
     updatedContent = updateCredentialTag(updatedContent, path);
-    
+
       ctx.attributes.content.md = updatedContent;
 
   const html = md2markup(ctx);
 
   return new Response(html, {
     status: 200,
-    headers: {
+    headers: ['127.0.0.1', 'localhost'].includes(hostname) ? {
+      'content-type': 'text/html',
+      'Access-Control-Allow-Origin': 'http://localhost:3000',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    } : {
       'content-type': 'text/html',
     },
   });
