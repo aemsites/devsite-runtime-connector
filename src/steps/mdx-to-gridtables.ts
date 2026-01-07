@@ -73,8 +73,8 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     const isHorizontalLine = node.name === 'HorizontalLine';
 
-    const isFragment = node.name === 'Fragment';
-
+    // These components does not a fallback repeat
+    const isDefaultNode = node.name === 'Fragment' || node.name === 'iframe';
 
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
@@ -87,7 +87,7 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
 
     // repeat the block N times if repeat="N" is set
     const repeatAttr = getAttribute(node, 'repeat');
-    const repeat = isFragment ? 0 : parseInt(getAttributeValue(repeatAttr, '1'), 10);
+    const repeat = isDefaultNode ? 0 : parseInt(getAttributeValue(repeatAttr, '1'), 10);
 
     // get variants as string
     const variantAttr = getAttribute(node, 'variant');
