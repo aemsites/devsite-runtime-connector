@@ -24,7 +24,9 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     owner,
     repo,
     branch,
-    pathprefix
+    pathprefix,
+    localMode,
+    origin
   } = ctx.attributes.content;
 
   // do not rewrite the links if it's an external link or an anchor link.
@@ -57,7 +59,13 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     // use this image URL
     const imageURL = `${projectRoot}${relativePath}`;
 
-    const fetchImage = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${imageURL}`;
+    let fetchImage;
+    if(localMode) {
+      let flatPath = imageURL.replace('/src/pages', '');
+      fetchImage = `${origin}${flatPath}`;
+    } else {
+      fetchImage = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${imageURL}`;
+    }
     resolved = fetchImage;
     log.debug(`    resolved start: ${resolved}`);
     resolved = `${resolved}`;

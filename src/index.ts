@@ -69,6 +69,10 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
     localMode = true;
   }
 
+  // Store localMode and origin in context for use in other steps
+  ctx.attributes.content.localMode = localMode;
+  ctx.attributes.content.origin = origin;
+
   // retrieve the devsitepaths.json file based on if authorization is present
   // always retrieve from stage devsitepaths.json when in local mode
   if(req.headers.get('authorization') || localMode) {
@@ -222,7 +226,13 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
     if (pathName.endsWith('md')) {
       const resolvedPath = resolvePath(pathName, path);
-      const rawUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${resolvedPath}`;
+      let rawUrl;
+      if(localMode) {
+        let flatPath = resolvedPath.replace('/src/pages', '');
+        rawUrl = `${origin}${flatPath}`;
+      } else {
+        rawUrl = `https://raw.githubusercontent.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${resolvedPath}`;
+      }
 
       try {
         const fragment = await fetchData(rawUrl);
