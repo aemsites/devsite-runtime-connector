@@ -60,6 +60,7 @@ function listToMatrix<T>(list: T[], width: number): T[][] {
 
 export default function mdxToBlocks(ctx: Helix.UniversalContext) {
   const { content: { mdast } } = ctx.attributes;
+  const { log } = ctx;
   const ATTRIBUTE_PREFIX = 'data-';
 
   // for loop since we mutate in the loop
@@ -117,18 +118,39 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     const totalSlots = repeat * slots.length;
     let slotsToInsert = mdast.children.slice(i + 1, i + 1 + totalSlots);
 
-    if (node.name === 'Embed') { // This is for embedding local videos
-      slotsToInsert = slotsToInsert.map((val) => {
-        const valWithChildren = val as { children: Array<any> };
-        if (valWithChildren.children) {
-          valWithChildren.children = valWithChildren.children.map((data) => {
-            const updatedValue = resolve(ctx, data.value, 'img');
-            return { ...data, value: updatedValue };
-          });
-        }
-        return val;
-      });
-    }
+    // Helper function to recursively resolve image URLs in nodes
+    const resolveImagesInNode = (nodeItem: any): any => {
+      if (!nodeItem) return nodeItem;
+
+      // Handle image nodes (type: 'image' with url property)
+      if (nodeItem.type === 'image' && nodeItem.url) {
+        return {
+          ...nodeItem,
+          url: resolve(ctx, nodeItem.url, 'img'),
+        };
+      }
+
+      // Handle nodes with children
+      if (nodeItem.children && Array.isArray(nodeItem.children)) {
+        return {
+          ...nodeItem,
+          children: nodeItem.children.map(resolveImagesInNode),
+        };
+      }
+
+      // For Embed component - handle legacy structure with value property
+      if (node.name === 'Embed' && nodeItem.value) {
+        return {
+          ...nodeItem,
+          value: resolve(ctx, nodeItem.value, 'img'),
+        };
+      }
+
+      return nodeItem;
+    };
+
+    // Resolve image URLs in all slots for all components
+    slotsToInsert = slotsToInsert.map(resolveImagesInNode);
 
 
     const rowsToInsert = listToMatrix(slotsToInsert, slots.length);

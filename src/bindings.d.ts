@@ -25,6 +25,8 @@ export interface Content {
   branch?: string;
   rest?: string;
   pathprefix?: string;
+  localMode?: boolean;
+  origin?: string;
 }
 
 declare module 'mdast' {
