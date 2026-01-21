@@ -20,6 +20,7 @@ function wrapHtml(
   githubBlobPath: string,
   isDocumentationMode: boolean,
   hideBreadcrumbNav?: string,
+  hideEditInGithub?: string,
   layout?: string,
   title?: string,
   description?: string,
@@ -39,6 +40,7 @@ function wrapHtml(
     <meta name="githubblobpath" content="${githubBlobPath}">
     ${isDocumentationMode ? documentationString : ''}
     ${hideBreadcrumbNav ? `<meta name="hidebreadcrumbnav" content="${hideBreadcrumbNav}">` : ''}
+    ${hideEditInGithub ? `<meta name="hideeditingithub" content="${hideEditInGithub}">` : ''}
     ${layout ? `<meta name="layout" content="${layout}">` : ''}
   </head>
   <body>
@@ -110,11 +112,12 @@ export default function stringify(ctx: Helix.UniversalContext) {
   const { pathprefix } = ctx.attributes.content;
   const githubBlobPath = `https://github.com/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/blob/${ctx.attributes.content.branch}${ctx.attributes.content.path}`;
   const hideBreadcrumbNav = parseVariable(ctx.attributes.content.md, "hideBreadcrumbNav:", log);
+  const hideEditInGithub = parseVariable(ctx.attributes.content.md, "hideEditInGithub:", log);
   const layout = parseVariable(ctx.attributes.content.md, "layout:", log);
   const docTitle = parseVariable(ctx.attributes.content.md, "title:", log);
   const docDescription = parseVariable(ctx.attributes.content.md, "description:", log);
   const searchKeywords = parseVariable(ctx.attributes.content.md, "keywords:", log);
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav, layout, docTitle, docDescription, searchKeywords);
+  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav, hideEditInGithub, layout, docTitle, docDescription, searchKeywords);
 }
