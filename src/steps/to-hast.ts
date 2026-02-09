@@ -19,12 +19,56 @@ import { Helix } from '@adobe/helix-universal';
 import { toHast as mdast2hast, defaultHandlers, State } from 'mdast-util-to-hast';
 import { raw } from 'hast-util-raw';
 import { mdast2hastGridTablesHandler, TYPE_TABLE } from '@adobe/mdast-util-gridtables';
+import { toString } from 'hast-util-to-string';
+
+/**
+ * Converts text to a URL-friendly slug for use as heading IDs.
+ * @param text - The heading text to convert
+ * @returns A lowercase, hyphenated slug
+ */
+function textToSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-')          // Replace spaces with hyphens
+    .replace(/-+/g, '-')           // Replace multiple hyphens with single hyphen
+    .replace(/^-+/, '')            // Remove leading hyphens
+    .replace(/-+$/, '');           // Remove trailing hyphens
+}
+
+/**
+ * Creates a custom heading handler that generates IDs for anchor links.
+ * @param depth - The heading level (1-6)
+ * @returns A handler function for the heading
+ */
+function createHeadingHandler(depth: number) {
+  return (state: State, node: any) => {
+    const children = state.all(node);
+    const result = {
+      type: 'element' as const,
+      tagName: `h${depth}`,
+      properties: {} as Record<string, string>,
+      children,
+    };
+
+    // Generate ID from heading text content
+    const textContent = toString(result);
+    if (textContent) {
+      result.properties.id = textToSlug(textContent);
+    }
+
+    return result;
+  };
+}
 
 export default function toHast(ctx: Helix.UniversalContext) {
   const { content } = ctx.attributes;
   content.hast = mdast2hast(content.mdast, {
     handlers: {
       ...defaultHandlers,
+      heading: (state: State, node: any) => {
+        return createHeadingHandler(node.depth)(state, node);
+      },
       section: (state: State, node: any) => {
         const n = { ...node };
         const children = state.all(n);
