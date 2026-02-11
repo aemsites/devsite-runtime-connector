@@ -22,7 +22,7 @@ function wrapHtml(
   hideBreadcrumbNav?: string,
   hideEditInGitHub?: string,
   hideLogIssue?: string,
-  hideCopyMarkDown?: string,
+  hideCopyMarkdown?: string,
   layout?: string,
   title?: string,
   description?: string,
@@ -44,7 +44,7 @@ function wrapHtml(
     ${hideBreadcrumbNav ? `<meta name="hidebreadcrumbnav" content="${hideBreadcrumbNav}">` : ''}
     ${hideEditInGitHub ? `<meta name="hideeditingithub" content="${hideEditInGitHub}">` : ''}
     ${hideLogIssue ? `<meta name="hidelogissue" content="${hideLogIssue}">` : ''}
-    ${hideCopyMarkDown ? `<meta name="hidecopymarkdown" content="${hideCopyMarkDown}">` : ''}
+    ${hideCopyMarkdown ? `<meta name="hidecopymarkdown" content="${hideCopyMarkdown}">` : ''}
     ${layout ? `<meta name="layout" content="${layout}">` : ''}
   </head>
   <body>
@@ -118,12 +118,12 @@ export default function stringify(ctx: Helix.UniversalContext) {
   const hideBreadcrumbNav = parseVariable(ctx.attributes.content.md, "hideBreadcrumbNav:", log);
   const hideEditInGitHub = parseVariable(ctx.attributes.content.md, "hideEditInGitHub:", log);
   const hideLogIssue = parseVariable(ctx.attributes.content.md, "hideLogIssue:", log);
-  const hideCopyMarkDown = parseVariable(ctx.attributes.content.md, "hideCopyMarkDown:", log);
+  const hideCopyMarkdown = parseVariable(ctx.attributes.content.md, "hideCopyMarkdown:", log);
   const layout = parseVariable(ctx.attributes.content.md, "layout:", log);
   const docTitle = parseVariable(ctx.attributes.content.md, "title:", log);
   const docDescription = parseVariable(ctx.attributes.content.md, "description:", log);
   const searchKeywords = parseVariable(ctx.attributes.content.md, "keywords:", log);
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav, hideEditInGitHub, hideLogIssue, hideCopyMarkDown, layout, docTitle, docDescription, searchKeywords);
+  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav, hideEditInGitHub, hideLogIssue, hideCopyMarkdown, layout, docTitle, docDescription, searchKeywords);
 }
