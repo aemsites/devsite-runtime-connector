@@ -84,7 +84,12 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     //   // TODO: throw error for invalid document
     //   break;
     // }
-    const slots = isHorizontalLine ? [] : slotsValue.split(',');
+    const slots = isHorizontalLine
+      ? []
+      : slotsValue
+        .split(',')
+        .map((slot) => slot.trim())
+        .filter((slot) => slot.length > 0);
 
     // repeat the block N times if repeat="N" is set
     const repeatAttr = getAttribute(node, 'repeat');
