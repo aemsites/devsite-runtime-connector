@@ -72,11 +72,6 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
       continue;
     }
 
-    const isHorizontalLine = node.name === 'HorizontalLine';
-
-    // These components does not a fallback repeat
-    const isDefaultNode = node.name === 'Fragment' || node.name === 'iframe';
-
     // get slots
     const slotsAttr = getAttribute(node, 'slots');
     const slotsValue = getAttributeValue(slotsAttr, '');
@@ -84,16 +79,14 @@ export default function mdxToBlocks(ctx: Helix.UniversalContext) {
     //   // TODO: throw error for invalid document
     //   break;
     // }
-    const slots = isHorizontalLine
-      ? []
-      : slotsValue
+    const slots = slotsValue
         .split(',')
         .map((slot) => slot.trim())
         .filter((slot) => slot.length > 0);
 
     // repeat the block N times if repeat="N" is set
     const repeatAttr = getAttribute(node, 'repeat');
-    const repeat = isDefaultNode ? 0 : parseInt(getAttributeValue(repeatAttr, '1'), 10);
+    const repeat = parseInt(getAttributeValue(repeatAttr, '1'), 10);
 
     // get variants as string
     const variantAttr = getAttribute(node, 'variant');
