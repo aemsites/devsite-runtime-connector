@@ -19,8 +19,9 @@ import md2markup from './md2markup.js';
 
 function getUrlExtension(url) {
   let extension;
-  if (url.split('.').length > 1) {
-    extension = url.split(/[#?]/)[0].split('.').pop().trim();
+  const lastSegment = url.split('/').pop() || '';
+  if (lastSegment.split('.').length > 1) {
+    extension = lastSegment.split(/[#?]/)[0].split('.').pop().trim();
   }
   return extension;
 }
