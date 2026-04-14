@@ -174,6 +174,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
   log.debug(`    contentUrl: ${contentUrl}`);
   const res = await fetch(contentUrl);
+  const lastModified = res.headers.get('last-modified');
   if (!res.ok) {
     const status = res.status < 500 ? res.status : 500;
     return new Response('', {
@@ -281,16 +282,21 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
   const html = md2markup(ctx);
 
+  const responseHeaders: Record<string, string> = ['127.0.0.1', 'localhost'].includes(hostname) ? {
+    'content-type': 'text/html',
+    'Access-Control-Allow-Origin': 'http://localhost:3000',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  } : {
+    'content-type': 'text/html',
+  };
+  if (lastModified) {
+    responseHeaders['last-modified'] = lastModified;
+  }
+
   return new Response(html, {
     status: 200,
-    headers: ['127.0.0.1', 'localhost'].includes(hostname) ? {
-      'content-type': 'text/html',
-      'Access-Control-Allow-Origin': 'http://localhost:3000',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    } : {
-      'content-type': 'text/html',
-    },
+    headers: responseHeaders,
   });
 }
 
