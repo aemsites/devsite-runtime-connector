@@ -55,6 +55,8 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
   if (resolved.endsWith('.md') || resolved.includes(".md#")) {
     resolved = `${pathprefix}/${relativePath}`;
+  } else if (type === 'a') {
+    resolved = `${pathprefix}/${relativePath}`;
   } else if (type === 'img') {
     // use this image URL
     const imageURL = `${projectRoot}${relativePath}`;
@@ -111,9 +113,9 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
         else {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
         }
+      } else {
+        node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
       }
-
-      node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
 
     }
     return CONTINUE;
