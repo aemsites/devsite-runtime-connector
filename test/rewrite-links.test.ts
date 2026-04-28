@@ -4,11 +4,25 @@
  */
 
 import { Helix } from '@adobe/helix-universal';
-import { resolve } from '../src/steps/rewrite-links.js';
+import { resolve, isPrivateContentOrg } from '../src/steps/rewrite-links.js';
 import rewriteLinks from '../src/steps/rewrite-links.js';
 import { DEFAULT_CONTEXT } from './util.js';
 
 describe('rewrite-links', () => {
+  describe('isPrivateContentOrg', () => {
+    it('returns true for AdobeDocsPrivate org', () => {
+      expect(isPrivateContentOrg('AdobeDocsPrivate')).to.equal(true);
+    });
+
+    it('returns false for public AdobeDocs org', () => {
+      expect(isPrivateContentOrg('AdobeDocs')).to.equal(false);
+    });
+
+    it('returns false when owner is missing', () => {
+      expect(isPrivateContentOrg(undefined)).to.equal(false);
+    });
+  });
+
   let ctx: Helix.UniversalContext;
 
   beforeEach(() => {
@@ -135,6 +149,50 @@ describe('rewrite-links', () => {
         expect(result).to.include('github-actions-test');
       });
 
+      it('should use public origin + pathprefix for private org images (remote mode)', () => {
+        const privateCtx = DEFAULT_CONTEXT({
+          attributes: {
+            content: {
+              root: '/src/pages/support',
+              path: '/src/pages/support/index.md',
+              pathprefix: '/private-eds',
+              owner: 'AdobeDocsPrivate',
+              repo: 'adp-dev-docs-private',
+              branch: 'main',
+              localMode: false,
+              origin: 'https://raw.githubusercontent.com',
+              publicOrigin: 'https://developer-stage.adobe.com',
+            },
+          },
+        });
+
+        const result = resolve(privateCtx, 'cc.png', 'img');
+        expect(result).to.equal(
+          'https://developer-stage.adobe.com/private-eds/support/cc.png',
+        );
+        expect(result).to.not.include('raw.githubusercontent.com');
+      });
+
+      it('should fall back to raw GitHub when publicOrigin is missing (private org)', () => {
+        const privateCtx = DEFAULT_CONTEXT({
+          attributes: {
+            content: {
+              root: '/src/pages/support',
+              path: '/src/pages/support/index.md',
+              pathprefix: '/private-eds',
+              owner: 'AdobeDocsPrivate',
+              repo: 'adp-dev-docs-private',
+              branch: 'main',
+              localMode: false,
+              origin: 'https://raw.githubusercontent.com',
+            },
+          },
+        });
+
+        const result = resolve(privateCtx, 'cc.png', 'img');
+        expect(result).to.include('raw.githubusercontent.com');
+      });
+
       it('should generate local URL for images (local mode)', () => {
         const localCtx = DEFAULT_CONTEXT({
           attributes: {
@@ -153,6 +211,73 @@ describe('rewrite-links', () => {
 
         const result = resolve(localCtx, './images/screenshot.png', 'img');
         expect(result).to.include('127.0.0.1:3003');
+      });
+    });
+
+    describe('Anchor hrefs to downloadable / static assets', () => {
+      it('should generate GitHub raw URL for .zip (remote, public org)', () => {
+        const result = resolve(ctx, './assets/sample.zip', 'a');
+        expect(result).to.include('raw.githubusercontent.com');
+        expect(result).to.include('AdobeDocs');
+        expect(result).to.include('github-actions-test');
+        expect(result).to.include('sample.zip');
+      });
+
+      it('should generate GitHub raw URL for .pdf (remote, public org)', () => {
+        const result = resolve(ctx, './assets/guide.pdf', 'a');
+        expect(result).to.include('raw.githubusercontent.com');
+        expect(result).to.include('guide.pdf');
+      });
+
+      it('should generate GitHub raw URL for .d.ts (remote, public org)', () => {
+        const result = resolve(ctx, './types/example.d.ts', 'a');
+        expect(result).to.include('raw.githubusercontent.com');
+        expect(result).to.include('example.d.ts');
+      });
+
+      it('should use public origin + pathprefix for private org .zip anchor', () => {
+        const privateCtx = DEFAULT_CONTEXT({
+          attributes: {
+            content: {
+              root: '/src/pages/support',
+              path: '/src/pages/support/index.md',
+              pathprefix: '/private-eds',
+              owner: 'AdobeDocsPrivate',
+              repo: 'adp-dev-docs-private',
+              branch: 'main',
+              localMode: false,
+              origin: 'https://raw.githubusercontent.com',
+              publicOrigin: 'https://developer-stage.adobe.com',
+            },
+          },
+        });
+
+        const result = resolve(privateCtx, './assets/bundle.zip', 'a');
+        expect(result).to.equal(
+          'https://developer-stage.adobe.com/private-eds/support/assets/bundle.zip',
+        );
+        expect(result).to.not.include('raw.githubusercontent.com');
+      });
+
+      it('should use local content origin for .zip in local mode', () => {
+        const localCtx = DEFAULT_CONTEXT({
+          attributes: {
+            content: {
+              root: '/src/pages/test',
+              path: '/src/pages/test/test-page.md',
+              pathprefix: '/github-actions-test/test',
+              owner: 'AdobeDocs',
+              repo: 'github-actions-test',
+              branch: 'main',
+              localMode: true,
+              origin: 'http://127.0.0.1:3003',
+            },
+          },
+        });
+
+        const result = resolve(localCtx, './files/demo.zip', 'a');
+        expect(result).to.include('127.0.0.1:3003');
+        expect(result).to.include('demo.zip');
       });
     });
   });

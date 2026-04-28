@@ -14,10 +14,71 @@ import { CONTINUE, visit } from 'unist-util-visit';
 import path from 'path';
 import type { Helix } from '@adobe/helix-universal';
 
+/** Private AdobeDocs orgs cannot use raw.githubusercontent.com; assets are served from the public site origin (see getResourceUrl in lib-adobeio.js). */
+export function isPrivateContentOrg(owner?: string): boolean {
+  return Boolean(owner && owner.includes('AdobeDocsPrivate'));
+}
+
+/** Extensions for `<a href>` targets resolved like `<img src>` (raw GitHub / public origin / local). */
+const REPO_ASSET_EXTENSIONS = new Set([
+  '7z',
+  'avif',
+  'csv',
+  'doc',
+  'docx',
+  'epub',
+  'gif',
+  'gz',
+  'ico',
+  'jpeg',
+  'jpg',
+  'json',
+  'mkv',
+  'mov',
+  'mp3',
+  'mp4',
+  'pdf',
+  'png',
+  'ppt',
+  'pptx',
+  'rar',
+  'svg',
+  'tar',
+  'tgz',
+  'txt',
+  'wasm',
+  'wav',
+  'webm',
+  'webp',
+  'xls',
+  'xlsx',
+  'xml',
+  'yaml',
+  'yml',
+  'zip',
+]);
+
+/** Anchor-only: same file resolution as images (raw GitHub / public origin / local). */
+function isRepoAssetExtension(resolvedPath: string): boolean {
+  const lower = resolvedPath.replace(/\\/g, '/').split('#')[0].split('?')[0].toLowerCase();
+  if (lower.endsWith('.tar.gz') || lower.endsWith('.d.ts')) {
+    return true;
+  }
+  const base = path.basename(lower);
+  const lastDot = base.lastIndexOf('.');
+  if (lastDot <= 0 || lastDot === base.length - 1) {
+    return false;
+  }
+  return REPO_ASSET_EXTENSIONS.has(base.slice(lastDot + 1));
+}
+
+const noopLog = { debug: (): void => {} };
+
 export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'img' | 'a') {
-  const { log } = ctx;
+  const log = ctx.log ?? noopLog;
 
 
+  const content = ctx.attributes.content!;
   const {
     root,
     path: docPath,
@@ -26,8 +87,9 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     branch,
     pathprefix,
     localMode,
-    origin
-  } = ctx.attributes.content;
+    origin,
+  } = content;
+  const publicOrigin = (content as { publicOrigin?: string }).publicOrigin;
 
   // do not rewrite the links if it's an external link or an anchor link.
   if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://") || pathOrUrl.startsWith("#") || pathOrUrl.startsWith("mailto:")){
@@ -55,20 +117,21 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   const relativePath = path.relative(projectRoot, resolved).replaceAll('\\', '/');
   if (resolved.endsWith('.md') || resolved.includes(".md#")) {
     resolved = `${pathprefix}/${relativePath}`;
-  } else if (type === 'img') {
-    // use this image URL
-    const imageURL = `${projectRoot}${relativePath}`;
+  } else if (type === 'img' || isRepoAssetExtension(resolved)) {
+    const assetURL = `${projectRoot}${relativePath}`;
 
-    let fetchImage;
-    if(localMode) {
-      let flatPath = imageURL.replace('/src/pages', '');
-      fetchImage = `${origin}${flatPath}`;
+    let fetchAsset;
+    if (localMode) {
+      const flatPath = assetURL.replace('/src/pages', '');
+      fetchAsset = `${origin}${flatPath}`;
+    } else if (isPrivateContentOrg(owner) && publicOrigin && pathprefix) {
+      const prefix = pathprefix.startsWith('/') ? pathprefix : `/${pathprefix}`;
+      fetchAsset = `${publicOrigin}${prefix}/${relativePath}`;
     } else {
-      fetchImage = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${imageURL}`;
+      fetchAsset = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${assetURL}`;
     }
-    resolved = fetchImage;
+    resolved = fetchAsset;
     log.debug(`    resolved start: ${resolved}`);
-    resolved = `${resolved}`;
   }
 
   if(resolved === path.resolve(root)) {
@@ -81,7 +144,7 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
 }
 
 export default function rewriteLinks(ctx: Helix.UniversalContext) {
-  const { log } = ctx;
+  const log = ctx.log ?? noopLog;
   const { attributes: { content: { hast } } } = ctx;
 
   const els = {
