@@ -31,6 +31,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   const { log } = ctx;
   ctx.attributes ??= {};
   ctx.attributes.content ??= {};
+  (ctx.attributes.content as { publicOrigin?: string }).publicOrigin = new URL(req.url).origin;
   log.debug('--------------------------------');
   log.debug(`    WEBSERVER_PORT: ${process.env.WEBSERVER_PORT}`);
   log.debug('ctx.pathInfo:', ctx.pathInfo);
