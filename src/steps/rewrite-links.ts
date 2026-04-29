@@ -14,9 +14,23 @@ import { CONTINUE, visit } from 'unist-util-visit';
 import path from 'path';
 import type { Helix } from '@adobe/helix-universal';
 
-/** Private AdobeDocs orgs cannot use raw.githubusercontent.com; assets are served from the public site origin (see getResourceUrl in lib-adobeio.js). */
+// Private AdobeDocs orgs cannot use raw.githubusercontent.com; assets are served from the public site origin (see getResourceUrl in lib-adobeio.js).
 export function isPrivateContentOrg(owner?: string): boolean {
   return Boolean(owner && owner.includes('AdobeDocsPrivate'));
+}
+
+export function devSiteConnectorUsePublicAssetUrls(): boolean {
+  const v = process.env.DEVSITE_CONNECTOR_FLAG;
+  return v === 'true' || v === '1';
+}
+
+// Public developer site origin (e.g. `https://developer-stage.adobe.com` OR `https://developer.adobe.com`)
+export function devSiteConnectorPublicOrigin(): string | undefined {
+  const o = process.env.DEVSITE_CONNECTOR_PUBLIC_ORIGIN?.trim();
+  if (!o) {
+    return undefined;
+  }
+  return o.replace(/\/$/, '');
 }
 
 /** Extensions for `<a href>` targets resolved like `<img src>` (raw GitHub / public origin / local). */
@@ -89,7 +103,8 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     localMode,
     origin,
   } = content;
-  const publicOrigin = (content as { publicOrigin?: string }).publicOrigin;
+  const usePublicAssetUrls = devSiteConnectorUsePublicAssetUrls();
+  const publicOrigin = usePublicAssetUrls ? devSiteConnectorPublicOrigin() : undefined;
 
   // do not rewrite the links if it's an external link or an anchor link.
   if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://") || pathOrUrl.startsWith("#") || pathOrUrl.startsWith("mailto:")){
@@ -121,10 +136,11 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
     const assetURL = `${projectRoot}${relativePath}`;
 
     let fetchAsset;
-    if (localMode) {
+    //true local mode and not a deployment from a private site
+    if (localMode && !usePublicAssetUrls) {
       const flatPath = assetURL.replace('/src/pages', '');
       fetchAsset = `${origin}${flatPath}`;
-    } else if (isPrivateContentOrg(owner) && publicOrigin && pathprefix) {
+    } else if (isPrivateContentOrg(owner) && usePublicAssetUrls && pathprefix) {
       const prefix = pathprefix.startsWith('/') ? pathprefix : `/${pathprefix}`;
       fetchAsset = `${publicOrigin}${prefix}/${relativePath}`;
     } else {

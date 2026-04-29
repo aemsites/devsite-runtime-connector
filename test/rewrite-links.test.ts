@@ -4,9 +4,25 @@
  */
 
 import { Helix } from '@adobe/helix-universal';
-import { resolve, isPrivateContentOrg } from '../src/steps/rewrite-links.js';
+import {
+  resolve,
+  isPrivateContentOrg,
+  devSiteConnectorUsePublicAssetUrls,
+  devSiteConnectorPublicOrigin,
+} from '../src/steps/rewrite-links.js';
 import rewriteLinks from '../src/steps/rewrite-links.js';
 import { DEFAULT_CONTEXT } from './util.js';
+
+const CONNECTOR_FLAG = 'DEVSITE_CONNECTOR_FLAG';
+const CONNECTOR_PUBLIC_ORIGIN = 'DEVSITE_CONNECTOR_PUBLIC_ORIGIN';
+
+function restoreEnv(key: string, previous: string | undefined): void {
+  if (previous === undefined) {
+    delete process.env[key];
+  } else {
+    process.env[key] = previous;
+  }
+}
 
 describe('rewrite-links', () => {
   describe('isPrivateContentOrg', () => {
@@ -149,31 +165,73 @@ describe('rewrite-links', () => {
         expect(result).to.include('github-actions-test');
       });
 
-      it('should use public origin + pathprefix for private org images (remote mode)', () => {
-        const privateCtx = DEFAULT_CONTEXT({
-          attributes: {
-            content: {
-              root: '/src/pages/support',
-              path: '/src/pages/support/index.md',
-              pathprefix: '/private-eds',
-              owner: 'AdobeDocsPrivate',
-              repo: 'adp-dev-docs-private',
-              branch: 'main',
-              localMode: false,
-              origin: 'https://raw.githubusercontent.com',
-              publicOrigin: 'https://developer-stage.adobe.com',
-            },
-          },
-        });
+      it('should use public origin + pathprefix for private org images when connector flag is set (remote mode)', () => {
+        const prevFlag = process.env[CONNECTOR_FLAG];
+        const prevOrigin = process.env[CONNECTOR_PUBLIC_ORIGIN];
+        try {
+          process.env[CONNECTOR_FLAG] = 'true';
+          process.env[CONNECTOR_PUBLIC_ORIGIN] = 'https://developer-stage.adobe.com';
 
-        const result = resolve(privateCtx, 'cc.png', 'img');
-        expect(result).to.equal(
-          'https://developer-stage.adobe.com/private-eds/support/cc.png',
-        );
-        expect(result).to.not.include('raw.githubusercontent.com');
+          const privateCtx = DEFAULT_CONTEXT({
+            attributes: {
+              content: {
+                root: '/src/pages/support',
+                path: '/src/pages/support/index.md',
+                pathprefix: '/private-eds',
+                owner: 'AdobeDocsPrivate',
+                repo: 'adp-dev-docs-private',
+                branch: 'main',
+                localMode: true,
+                origin: 'https://raw.githubusercontent.com',
+              },
+            },
+          });
+
+          const result = resolve(privateCtx, 'cc.png', 'img');
+          expect(result).to.equal(
+            'https://developer-stage.adobe.com/private-eds/support/cc.png',
+          );
+          expect(result).to.not.include('raw.githubusercontent.com');
+        } finally {
+          restoreEnv(CONNECTOR_FLAG, prevFlag);
+          restoreEnv(CONNECTOR_PUBLIC_ORIGIN, prevOrigin);
+        }
       });
 
-      it('should fall back to raw GitHub when publicOrigin is missing (private org)', () => {
+      it('should NOT use public origin + pathprefix for private org images when connector flag is not set (local mode)', () => {
+        const prevFlag = process.env[CONNECTOR_FLAG];
+        const prevOrigin = process.env[CONNECTOR_PUBLIC_ORIGIN];
+        try {
+          process.env[CONNECTOR_FLAG] = 'undefined';
+          process.env[CONNECTOR_PUBLIC_ORIGIN] = 'undefined';
+
+          const privateCtx = DEFAULT_CONTEXT({
+            attributes: {
+              content: {
+                root: '/src/pages/support',
+                path: '/src/pages/support/index.md',
+                pathprefix: '/private-eds',
+                owner: 'AdobeDocsPrivate',
+                repo: 'adp-dev-docs-private',
+                branch: 'main',
+                localMode: true,
+                origin: 'http://127.0.0.1:3003',
+              },
+            },
+          });
+
+          const result = resolve(privateCtx, 'cc.png', 'img');
+          expect(result).to.equal(
+            'http://127.0.0.1:3003/support/cc.png',
+          );
+          expect(result).to.not.include('raw.githubusercontent.com');
+        } finally {
+          restoreEnv(CONNECTOR_FLAG, prevFlag);
+          restoreEnv(CONNECTOR_PUBLIC_ORIGIN, prevOrigin);
+        }
+      });
+
+      it('should fall back to raw GitHub when connector flag is off (private org)', () => {
         const privateCtx = DEFAULT_CONTEXT({
           attributes: {
             content: {
@@ -191,6 +249,38 @@ describe('rewrite-links', () => {
 
         const result = resolve(privateCtx, 'cc.png', 'img');
         expect(result).to.include('raw.githubusercontent.com');
+      });
+
+      it('should use DEVSITE_CONNECTOR_PUBLIC_ORIGIN when DEVSITE_CONNECTOR_FLAG is true (private org)', () => {
+        const prevFlag = process.env[CONNECTOR_FLAG];
+        const prevOrigin = process.env[CONNECTOR_PUBLIC_ORIGIN];
+        try {
+          process.env[CONNECTOR_FLAG] = 'true';
+          process.env[CONNECTOR_PUBLIC_ORIGIN] = 'https://developer.adobe.com/';
+          expect(devSiteConnectorUsePublicAssetUrls()).to.equal(true);
+          expect(devSiteConnectorPublicOrigin()).to.equal('https://developer.adobe.com');
+
+          const privateCtx = DEFAULT_CONTEXT({
+            attributes: {
+              content: {
+                root: '/src/pages/support',
+                path: '/src/pages/support/index.md',
+                pathprefix: '/private-eds',
+                owner: 'AdobeDocsPrivate',
+                repo: 'adp-dev-docs-private',
+                branch: 'main',
+                localMode: true,
+                origin: 'https://raw.githubusercontent.com',
+              },
+            },
+          });
+
+          const result = resolve(privateCtx, 'cc.png', 'img');
+          expect(result).to.equal('https://developer.adobe.com/private-eds/support/cc.png');
+        } finally {
+          restoreEnv(CONNECTOR_FLAG, prevFlag);
+          restoreEnv(CONNECTOR_PUBLIC_ORIGIN, prevOrigin);
+        }
       });
 
       it('should generate local URL for images (local mode)', () => {
@@ -235,28 +325,37 @@ describe('rewrite-links', () => {
         expect(result).to.include('example.d.ts');
       });
 
-      it('should use public origin + pathprefix for private org .zip anchor', () => {
-        const privateCtx = DEFAULT_CONTEXT({
-          attributes: {
-            content: {
-              root: '/src/pages/support',
-              path: '/src/pages/support/index.md',
-              pathprefix: '/private-eds',
-              owner: 'AdobeDocsPrivate',
-              repo: 'adp-dev-docs-private',
-              branch: 'main',
-              localMode: false,
-              origin: 'https://raw.githubusercontent.com',
-              publicOrigin: 'https://developer-stage.adobe.com',
-            },
-          },
-        });
+      it('should use public origin + pathprefix for private org .zip anchor when connector flag is set', () => {
+        const prevFlag = process.env[CONNECTOR_FLAG];
+        const prevOrigin = process.env[CONNECTOR_PUBLIC_ORIGIN];
+        try {
+          process.env[CONNECTOR_FLAG] = 'true';
+          process.env[CONNECTOR_PUBLIC_ORIGIN] = 'https://developer-stage.adobe.com';
 
-        const result = resolve(privateCtx, './assets/bundle.zip', 'a');
-        expect(result).to.equal(
-          'https://developer-stage.adobe.com/private-eds/support/assets/bundle.zip',
-        );
-        expect(result).to.not.include('raw.githubusercontent.com');
+          const privateCtx = DEFAULT_CONTEXT({
+            attributes: {
+              content: {
+                root: '/src/pages/support',
+                path: '/src/pages/support/index.md',
+                pathprefix: '/private-eds',
+                owner: 'AdobeDocsPrivate',
+                repo: 'adp-dev-docs-private',
+                branch: 'main',
+                localMode: true,
+                origin: 'https://raw.githubusercontent.com',
+              },
+            },
+          });
+
+          const result = resolve(privateCtx, './assets/bundle.zip', 'a');
+          expect(result).to.equal(
+            'https://developer-stage.adobe.com/private-eds/support/assets/bundle.zip',
+          );
+          expect(result).to.not.include('raw.githubusercontent.com');
+        } finally {
+          restoreEnv(CONNECTOR_FLAG, prevFlag);
+          restoreEnv(CONNECTOR_PUBLIC_ORIGIN, prevOrigin);
+        }
       });
 
       it('should use local content origin for .zip in local mode', () => {
