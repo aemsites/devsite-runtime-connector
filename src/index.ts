@@ -281,6 +281,21 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
       ctx.attributes.content.md = updatedContent;
 
+  // Content negotiation: return clean markdown for LLM consumers
+  const acceptHeader = req.headers.get('accept') || '';
+  if (acceptHeader.includes('text/markdown')) {
+    const mdHeaders: Record<string, string> = {
+      'content-type': 'text/markdown; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
+    };
+    if (lastModified) {
+      mdHeaders['last-modified'] = lastModified;
+    }
+    return new Response(updatedContent, { status: 200, headers: mdHeaders });
+  }
+
   const html = md2markup(ctx);
 
   const responseHeaders: Record<string, string> = ['127.0.0.1', 'localhost'].includes(hostname) ? {
