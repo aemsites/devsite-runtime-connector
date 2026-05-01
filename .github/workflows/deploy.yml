@@ -14,11 +14,11 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - name: Use Node.js LTS (Krypton)
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
+          node-version: "lts/krypton"
       - run: npm ci
       - run: npm test
 
@@ -27,11 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - name: Use Node.js LTS (Krypton)
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
+          node-version: "lts/krypton"
       - run: npm ci
       - name: Semantic Release
         run: npx semantic-release

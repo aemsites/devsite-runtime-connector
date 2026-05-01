@@ -78,7 +78,7 @@
     "prepare": "husky install"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^24.11.0"
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs}": "eslint"
