@@ -9,7 +9,7 @@ application:
           main:
             function: dist/index.js
             web: 'yes'
-            runtime: nodejs:20
+            runtime: nodejs:24
             inputs:
               LOG_LEVEL: debug
             annotations:
