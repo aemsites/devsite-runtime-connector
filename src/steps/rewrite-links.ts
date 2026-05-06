@@ -107,7 +107,7 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
   const publicOrigin = usePublicAssetUrls ? devSiteConnectorPublicOrigin() : undefined;
 
   // do not rewrite the links if it's an external link or an anchor link.
-  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://") || pathOrUrl.startsWith("#") || pathOrUrl.startsWith("mailto:")){
+  if (pathOrUrl.startsWith("www") || pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://") || pathOrUrl.startsWith("#") || pathOrUrl.startsWith("mailto:")){
     return pathOrUrl;
   }
 
