@@ -144,10 +144,10 @@ describe('rewrite-links', () => {
       expect(result).to.equal('/github-actions-test/test/test/anchor-link-in-table.md#request-object');
     });
 
-    it('external link with no http and https should fail', () => {
+    it('external link with no http and https should not be rewritten', () => {
       const result = resolve(ctx, 'www.google.com', 'a');
       // www.google.com is not recognized as external, so it gets rewritten as a relative path
-      expect(result).to.equal('/www.google.com');
+      expect(result).to.equal('www.google.com');
     });
 
     describe('Links that already have pathprefix', () => {
