@@ -142,7 +142,12 @@ export function resolve(ctx: Helix.UniversalContext, pathOrUrl: string, type: 'i
       fetchAsset = `${origin}${flatPath}`;
     } else if (isPrivateContentOrg(owner) && usePublicAssetUrls && pathprefix) {
       const prefix = pathprefix.startsWith('/') ? pathprefix : `/${pathprefix}`;
-      fetchAsset = `${publicOrigin}${prefix}/${relativePath}`;
+      // Remove leading / and any ../ or ./ segments to get private site path
+      const assetSitePath = relativePath
+        .split('/')
+        .filter((p) => p !== '..' && p !== '.')
+        .join('/');
+      fetchAsset = `${publicOrigin}${prefix}/${assetSitePath}`;
     } else {
       fetchAsset = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${assetURL}`;
     }
