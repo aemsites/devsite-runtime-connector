@@ -183,16 +183,16 @@ export default function rewriteLinks(ctx: Helix.UniversalContext) {
 
       const getNodeProperties = node.properties[attr].toString();
       if (attr === "href") {
-        if (getNodeProperties.endsWith('index.md')) {
+        const isExternal = getNodeProperties.startsWith("www") || getNodeProperties.startsWith("http://") || getNodeProperties.startsWith("https://") || getNodeProperties.startsWith("#") || getNodeProperties.startsWith("mailto:");
+        if (!isExternal && getNodeProperties.endsWith('index.md')) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace("index.md", "");
-        } else if (getNodeProperties.includes('index.md')) {
+        } else if (!isExternal && getNodeProperties.includes('index.md')) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace("index.md", "");
-        } else if (getNodeProperties.endsWith('.md')) {
+        } else if (!isExternal && getNodeProperties.endsWith('.md')) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').slice(0, -3);
-        } else if (getNodeProperties.includes(".md#")) {
+        } else if (!isExternal && getNodeProperties.includes(".md#")) {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a').replace(".md", "")
-        }
-        else {
+        } else {
           node.properties[attr] = resolve(ctx, node.properties[attr] as string, node.tagName as 'img' | 'a');
         }
       }
