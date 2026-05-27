@@ -27,7 +27,7 @@ function wrapHtml(
   title?: string,
   description?: string,
   searchKeywords? : string,
-  noToc?: string,
+  noOnThisPage?: string,
 ): string {
   const documentationString = '<meta name="template" content="documentation">';
   return `\
@@ -47,7 +47,7 @@ function wrapHtml(
     ${hideLogIssue ? `<meta name="hidelogissue" content="${hideLogIssue}">` : ''}
     ${hideCopyMarkdown ? `<meta name="hidecopymarkdown" content="${hideCopyMarkdown}">` : ''}
     ${layout ? `<meta name="layout" content="${layout}">` : ''}
-    ${noToc ? `<meta name="no-toc" content="${noToc}">` : ''}
+    ${noOnThisPage ? `<meta name="noonthispage" content="${noOnThisPage}">` : ''}
   </head>
   <body>
     <header></header>
@@ -125,8 +125,8 @@ export default function stringify(ctx: Helix.UniversalContext) {
   const docTitle = parseVariable(ctx.attributes.content.md, "title:", log);
   const docDescription = parseVariable(ctx.attributes.content.md, "description:", log);
   const searchKeywords = parseVariable(ctx.attributes.content.md, "keywords:", log);
-  const noToc = parseVariable(ctx.attributes.content.md, "no-toc:", log);
+  const noOnThisPage = parseVariable(ctx.attributes.content.md, "noOnThisPage:", log);
   content.html = wrapHtml(toHtml(content.hast, {
     upperDoctype: true,
-  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav, hideEditInGitHub, hideLogIssue, hideCopyMarkdown, layout, docTitle, docDescription, searchKeywords, noToc);
+  }), pathprefix, githubBlobPath, documetationMode, hideBreadcrumbNav, hideEditInGitHub, hideLogIssue, hideCopyMarkdown, layout, docTitle, docDescription, searchKeywords, noOnThisPage);
 }
