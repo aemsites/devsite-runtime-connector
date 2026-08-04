@@ -148,15 +148,17 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   }
 
   const rootPath = devsitePathMatch?.root;
-  let path = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
+  const basePath = `${rootPath}${suffixSplitRest.join('/')}`.replaceAll('//', '/');
+  const requestedWithSlash = basePath.endsWith('/');
+  const hasExplicitExtension = !!extension;
 
-  if (path.endsWith('/')) {
+  let path = basePath;
+  if (requestedWithSlash) {
     // impliclty grab index.md if it's a folder level
     path += 'index.md';
     extension = '.md';
-  }
-  // impliclty grab .md if there's no extension
-  if (!extension) {
+  } else if (!hasExplicitExtension) {
+    // impliclty grab .md if there's no
     path += '.md';
   }
 
@@ -176,14 +178,26 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
   log.debug(`    contentUrl: ${contentUrl}`);
   const res = await fetch(contentUrl);
   const lastModified = res.headers.get('last-modified');
-  if (!res.ok) {
-    const status = res.status < 500 ? res.status : 500;
-    return new Response('', {
-      status,
-      headers: {
-        'x-error': `failed to fetch from github (${res.status})`,
-      },
-    });
+  if (!res.ok && !hasExplicitExtension) {
+    const altPath = requestedWithSlash
+        ? `${basePath.slice(0, -1)}.md`
+        : `${basePath}/index.md`;
+    const altContentUrl = localMode
+        ? `${origin}${altPath.replace('/src/pages', '')}`
+        : `${origin}/${ctx.attributes.content.owner}/${ctx.attributes.content.repo}/${ctx.attributes.content.branch}${altPath}`;
+
+    const altRes = await fetch(altContentUrl);
+    if (altRes.ok) {
+      const requestUrl = new URL(req.url);
+      const canonicalSuffix = requestedWithSlash
+          ? ctx.pathInfo.suffix.slice(0, -1)
+          : `${ctx.pathInfo.suffix}/`;
+      return new Response('', {
+        status: 301,
+        headers: { Location: `${canonicalSuffix}${requestUrl.search}` },
+      });
+    }
+
   }
 
   if (!path.endsWith('.md')) {
