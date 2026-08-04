@@ -197,7 +197,16 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
         headers: { Location: `${canonicalSuffix}${requestUrl.search}` },
       });
     }
+  }
 
+  if (!res.ok) {
+    const status = res.status < 500 ? res.status : 500;
+    return new Response('', {
+      status,
+      headers: {
+        'x-error': `failed to fetch from github (${res.status})`,
+      },
+    });
   }
 
   if (!path.endsWith('.md')) {
