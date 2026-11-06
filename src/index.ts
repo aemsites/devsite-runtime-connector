@@ -304,7 +304,7 @@ export async function run(req: Request, ctx: Helix.UniversalContext): Promise<Re
 
       ctx.attributes.content.md = updatedContent;
 
-  const html = md2markup(ctx);
+  const html = await md2markup(ctx);
 
   const responseHeaders: Record<string, string> = ['127.0.0.1', 'localhost'].includes(hostname) ? {
     'content-type': 'text/html',

@@ -23,6 +23,7 @@ import removeMdxVars from './steps/remove-mdx-vars.js';
 import removeCodeClasses from './steps/remove-code-classes.js';
 import rewriteLinks from './steps/rewrite-links.js';
 import wrapTableBlocks from './steps/wrap-table-blocks.js';
+import prerenderRedocly from './steps/prerender-redocly.js';
 
 /**
  * Converts markdown to markup.
@@ -35,7 +36,10 @@ import wrapTableBlocks from './steps/wrap-table-blocks.js';
  *
  * @throws {Error} if there's a problem with the input.
  */
-export default function md2markup(ctx: Helix.UniversalContext) {
+export default async function md2markup(
+  ctx: Helix.UniversalContext,
+  fetcher?: typeof fetch,
+): Promise<string> {
   toMdast(ctx);
   removeMdxVars(ctx);
   wrapTableBlocks(ctx);
@@ -46,6 +50,7 @@ export default function md2markup(ctx: Helix.UniversalContext) {
   removeCodeClasses(ctx);
   fixSections(ctx);
   createPageBlocks(ctx);
+  await prerenderRedocly(ctx, fetcher);
   stringify(ctx);
   return ctx.attributes.content.html;
 }
