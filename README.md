@@ -23,6 +23,8 @@ npm run deploy
 
 > Note: deploying requires the env vars `AIO_RUNTIME_NAMESPACE` and `AIO_RUNTIME_AUTH` - they can be set in a `.env` file
 
+> After deploying, check that `npx aio rt action list md2markup` shows a new version and date. If it doesn't, rerun with `npm run deploy -- --force-deploy`: aio marks the action as deployed before uploading it, so a plain rerun can skip it.
+
 ### Notes
 - `.plain.html` shows what `devsite-runtime-connector` + AEM sends to [`adp-devsite`](https://github.com/AdobeDocs/adp-devsite).
 - Content must be redeployed for the latest `devsite-runtime-connector` changes to take effect, because EDS stores the HTML generated at deploy time and serves that copy. A normal content deploy only regenerates changed files, so use "Force deploy all files" to regenerate a whole repo.
